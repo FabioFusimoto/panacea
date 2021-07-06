@@ -99,3 +99,8 @@ header nav a {
     margin: 2rem 1rem;
   }
 }
+
+.inline-element {
+  display: inline-block;
+  margin-right: 16px;
+}

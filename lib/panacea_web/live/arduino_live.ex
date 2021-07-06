@@ -1,5 +1,6 @@
 defmodule PanaceaWeb.ArduinoLive do
   use PanaceaWeb, :live_view
+  alias Panacea.Worker, as: Worker
 
   @default_command "Select a command"
 
@@ -34,7 +35,7 @@ defmodule PanaceaWeb.ArduinoLive do
     command = form["command"]
     arg_list = build_argument_list(command, form)
 
-    Panacea.Commands.write!(command, arg_list)
+    Worker.execute(fn -> Panacea.Commands.write!(command, arg_list) end)
 
     updated_socket = socket
     |> assign(commands: build_command_list(), args: [], selected_command: "")

@@ -1,5 +1,6 @@
 defmodule PanaceaWeb.PngLive do
   use PanaceaWeb, :live_view
+  alias Panacea.Worker, as: Worker
 
   @dialyzer {:nowarn_function, [handle_event: 3]}
 
@@ -8,8 +9,8 @@ defmodule PanaceaWeb.PngLive do
   end
 
   def handle_event("display_png", %{"image_selection" => %{"image_path" => path}}, socket) do
-    Panacea.Leds.display_png(path)
-    {:noreply, put_flash(socket, :info, "Image #{path} was displayed")}
+    Worker.execute(fn -> Panacea.Leds.display_png(path) end)
+    {:noreply, put_flash(socket, :info, "Image #{path} in being displayed")}
   end
 
   def handle_event(
@@ -19,7 +20,7 @@ defmodule PanaceaWeb.PngLive do
         "target_fps" => fps,
         "repetitions" => repetitions}},
     socket) do
-    Panacea.Leds.display_gif(path, String.to_integer(fps), String.to_integer(repetitions))
-    {:noreply, put_flash(socket, :info, "GIF #{path} was displayed")}
+    Worker.execute(fn -> Panacea.Leds.display_gif(path, String.to_integer(fps), String.to_integer(repetitions)) end)
+    {:noreply, put_flash(socket, :info, "GIF #{path} is being displayed")}
   end
 end

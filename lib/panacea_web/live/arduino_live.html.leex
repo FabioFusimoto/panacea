@@ -9,7 +9,7 @@
         <%= submit("Select command") %>
     </div>
     </form>
-<%= else %>
+<% else %>
     <p>Selected command: <%= @selected_command %></p>
     <%= f = form_for(:submit, "#", [phx_submit: :submitted]) %>
     <div>

@@ -14,7 +14,7 @@ defmodule Panacea.Application do
       # Start the Endpoint (http/https)
       PanaceaWeb.Endpoint,
       # Open the serial connection
-      Panacea.Serial.Core
+      Panacea.Serial
       # Start a worker by calling: Panacea.Worker.start_link(arg)
       # {Panacea.Worker, arg}
     ]

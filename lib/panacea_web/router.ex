@@ -19,7 +19,9 @@ defmodule PanaceaWeb.Router do
 
     live "/", PageLive, :index
 
-    get "/arduino", ArduinoController, :connection
+    live "/rng", RngLive, :index
+
+    live "/arduino", ArduinoLive, :index
   end
 
   # Other scopes may use custom stacks.

@@ -1,0 +1,32 @@
+<h2>Arduino command control</h2>
+
+<%= if @selected_command == "" do %>
+    <%= f = form_for(:command_selection, "#", [phx_submit: :command_selected]) %>
+    <div>
+        <%= label(f, "Pick a command") %>
+        <%= select(f, :command, @commands) %>
+
+        <%= submit("Select command") %>
+    </div>
+    </form>
+<%= else %>
+    <p>Selected command: <%= @selected_command %></p>
+    <%= f = form_for(:submit, "#", [phx_submit: :submitted]) %>
+    <div>
+        <div>
+            <div style="display: none;">
+                <%= label(f, :command) %>
+                <%= text_input(f, :command, value: @selected_command) %>
+            </div>
+            <%= for arg <- @args do %>
+                <div class="inline-element">
+                    <%= label(f, arg) %>
+                    <%= number_input(f, arg, value: 0) %>
+                </div>
+            <% end %>
+        </div>
+
+        <%= submit("Send command") %>
+    </div>
+    </form>
+<% end %>

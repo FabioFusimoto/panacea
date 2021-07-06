@@ -1,4 +1,4 @@
-defmodule Panacea.Serial.Core do
+defmodule Panacea.Serial do
   use Agent
   alias Circuits.UART, as: Serial
 
@@ -10,7 +10,7 @@ defmodule Panacea.Serial.Core do
     Agent.start_link(fn -> connect() end, name: @agent)
   end
 
-  def connect() do
+  defp connect() do
     {:ok, connection} = Serial.start_link()
     Serial.open(connection, @port, speed: @baud_rate, active: false)
     connection

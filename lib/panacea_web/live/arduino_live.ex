@@ -23,7 +23,11 @@ defmodule PanaceaWeb.ArduinoLive do
 
   def handle_event("command_selected", %{"command_selection" => %{"command" => command}}, socket) do
     args = available_commands()[command]
-    {:noreply, assign(socket, selected_command: command, args: args)}
+    updated_socket = socket
+    |> assign(selected_command: command, args: args)
+    |> clear_flash()
+
+    {:noreply, updated_socket}
   end
 
   def handle_event("submitted", %{"submit" => form}, socket) do
@@ -32,6 +36,9 @@ defmodule PanaceaWeb.ArduinoLive do
 
     Panacea.Commands.write!(command, arg_list)
 
-    {:noreply, assign(socket, commands: build_command_list(), args: [], selected_command: "")}
+    updated_socket = socket
+    |> assign(commands: build_command_list(), args: [], selected_command: "")
+    |> put_flash(:info, "Command #{command} excecuted with args #{inspect(arg_list)}")
+    {:noreply, updated_socket}
   end
 end

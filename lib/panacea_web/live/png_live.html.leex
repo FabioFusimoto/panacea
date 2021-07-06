@@ -1,0 +1,32 @@
+<h2>PNG Utils</h2>
+
+<%= f = form_for(:image_selection, "#", [phx_submit: :display_png]) %>
+<div>
+
+    <%= label(f, "Image path") %>
+    <%= text_input(f, :image_path) %>
+    <%= submit("Display image") %>
+</div>
+</form>
+
+<%= f = form_for(:gif_selection, "#", [phx_submit: :display_gif]) %>
+<div>
+
+    <%= label(f, "GIF path") %>
+    <%= text_input(f, :gif_path) %>
+
+    <div class="inline-element">
+        <%= label(f, "Target FPS") %>
+        <%= number_input(f, :target_fps, value: 8) %>
+    </div>
+
+    <div class="inline-element">
+        <%= label(f, "Repetitions") %>
+        <%= number_input(f, :repetitions, value: 4) %>
+    </div>
+
+    <div>
+        <%= submit("Display GIF") %>
+    </div>
+</div>
+</form>

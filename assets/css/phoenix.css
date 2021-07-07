@@ -104,3 +104,13 @@ header nav a {
   display: inline-block;
   margin-right: 24px;
 }
+
+.game-window {
+  width:500px; /* or whatever width you want. */
+  max-width:500px; /* or whatever width you want. */
+  height:500px;
+  max-height:500px;
+  border: 1px;
+  border-style: solid;
+  border-radius: 16px;
+}

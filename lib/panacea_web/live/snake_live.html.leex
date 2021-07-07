@@ -4,4 +4,5 @@
     <button phx-click="start_game">Start!</button>
 <% else %>
     <button phx-click="stop_game">Stop!</button>
+    <div id="game" class="game-window" phx-window-keydown="handle_key">
 <% end %>

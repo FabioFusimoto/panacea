@@ -1,0 +1,7 @@
+<h2>Snake Game</h2>
+
+<%= if !@started do %>
+    <button phx-click="start_game">Start!</button>
+<% else %>
+    <button phx-click="stop_game">Stop!</button>
+<% end %>

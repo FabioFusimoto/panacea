@@ -24,6 +24,8 @@ defmodule PanaceaWeb.Router do
     live "/arduino", ArduinoLive, :index
 
     live "/png", PngLive, :index
+
+    live "/snake", SnakeLive, :index
   end
 
   # Other scopes may use custom stacks.

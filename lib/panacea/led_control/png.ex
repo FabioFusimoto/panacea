@@ -3,7 +3,7 @@ defmodule Panacea.Png do
 
   @height 18
   @width 18
-  @dialyzer {:nowarn_function, read_image: 1}
+  @dialyzer {:nowarn_function, rgba_to_rgb: 1, read_image: 1}
 
   defp rgba_to_rgb({r, g, b, _}) do
     Tuple.to_list({r, g, b})
@@ -33,7 +33,10 @@ defmodule Panacea.Png do
   def read_gif(directory) do
     files = Path.wildcard(directory <> "*.png")
 
-    frames = Enum.map(files, &read_image/1)
+    frames = files
+    |> Enum.map(fn image -> Task.async(fn -> read_image(image) end) end)
+    |> Enum.map(fn task -> Task.await(task) end)
+
     frame_count = length(frames)
 
     shifted_frames = frames

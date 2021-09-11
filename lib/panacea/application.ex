@@ -9,16 +9,18 @@ defmodule Panacea.Application do
     children = [
       # Start the Telemetry supervisor
       PanaceaWeb.Telemetry,
+
       # Start the PubSub system
       {Phoenix.PubSub, name: Panacea.PubSub},
+
       # Start the Endpoint (http/https)
       PanaceaWeb.Endpoint,
+
       # Open the serial connection
       Panacea.Serial,
+
       # Start the command handler ("background" worker)
       Panacea.Worker
-      # Start a worker by calling: Panacea.Worker.start_link(arg)
-      # {Panacea.Worker, arg}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

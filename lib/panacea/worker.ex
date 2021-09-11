@@ -1,32 +1,44 @@
 defmodule Panacea.Worker do
-  use Agent
+  use GenServer
 
-  # This :worker Agent is supposed to store the pid for the proccess it's currently
-  # executing; or nil if it's not executing anything
-  @agent :worker
+  def start_link(_) do
+    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
+  end
 
-  def start_link(_args) do
-    Agent.start_link(fn -> nil end, name: @agent)
+  def init(_) do
+    {:ok, %{current_task: nil}}
   end
 
   def execute(task) do
-    reset_if_running()
-
-    {:ok, new_pid} = Task.start(
-      fn ->
-        task.()
-        Agent.update(@agent, fn _current_pid -> nil end)
-      end
-    )
-
-    Agent.update(@agent, fn _current_pid -> new_pid end)
+    GenServer.cast(__MODULE__, {:execute, task})
   end
 
   def reset_if_running() do
-    current_pid = Agent.get(@agent, fn pid -> pid end)
+    GenServer.call(__MODULE__, {:clear})
+  end
 
-    if current_pid do
-      Process.exit(current_pid, :kill)
+  def handle_cast({:execute, task}, %{current_task: current_task}) do
+    kill_current_task(current_task)
+
+    {:ok, task_pid} = Task.start(
+      fn ->
+        task.()
+        :cleared = GenServer.call(__MODULE__, {:clear})
+      end
+    )
+
+    {:noreply, %{current_task: task_pid}}
+  end
+
+  def handle_call({:clear}, _, %{current_task: current_task}) do
+    kill_current_task(current_task)
+    {:reply, :cleared, %{current_task: nil}}
+  end
+
+  defp kill_current_task(current_task) do
+    if current_task do
+      Process.exit(current_task, :kill)
     end
   end
+
 end

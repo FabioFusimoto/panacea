@@ -1,22 +1,25 @@
 defmodule Panacea.Serial do
-  use Agent
+  use GenServer
   alias Circuits.UART, as: Serial
 
-  @agent :serial_connection
   @port "ttyUSB0"
   @baud_rate 115_200
 
-  def start_link(_args) do
-    Agent.start_link(fn -> connect() end, name: @agent)
+  def start_link(_) do
+    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
-  defp connect() do
+  def init(_) do
     {:ok, connection} = Serial.start_link()
     Serial.open(connection, @port, speed: @baud_rate, active: false)
-    connection
+    {:ok, %{connection: connection}}
   end
 
   def retrieve_connection() do
-    Agent.get(@agent, fn connection -> connection end, 1000)
+    GenServer.call(__MODULE__, {:retrieve_connection})
+  end
+
+  def handle_call({:retrieve_connection}, _, %{connection: connection}) do
+    {:reply, connection, %{connection: connection}}
   end
 end

@@ -5,6 +5,17 @@
 
     <%= label(f, "Image path") %>
     <%= text_input(f, :image_path) %>
+
+    <div class="inline-element">
+        <%= label(f, "X Offset") %>
+        <%= number_input(f, :x_offset, value: 0) %>
+    </div>
+
+    <div class="inline-element">
+        <%= label(f, "Y Offset") %>
+        <%= number_input(f, :y_offset, value: 0) %>
+    </div>
+
     <%= submit("Display image") %>
 </div>
 </form>

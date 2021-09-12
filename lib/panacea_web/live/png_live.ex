@@ -8,8 +8,12 @@ defmodule PanaceaWeb.PngLive do
     {:ok, socket}
   end
 
-  def handle_event("display_png", %{"image_selection" => %{"image_path" => path}}, socket) do
-    Worker.execute(fn -> Panacea.Leds.display_png(path) end)
+  def handle_event(
+    "display_png",
+    %{"image_selection" => %{"image_path" => path, "x_offset" => x_offset, "y_offset" => y_offset}},
+    socket) do
+    offset = {String.to_integer(x_offset), String.to_integer(y_offset)}
+    Worker.execute(fn -> Panacea.Leds.display_png(path, offset) end)
     {:noreply, put_flash(socket, :info, "Image #{path} in being displayed")}
   end
 

@@ -11,7 +11,11 @@ defmodule Panacea.Snake.Game do
   @width 18
   @height 18
   @game_timeout 125
-  @animation_time 750 # in ms
+  @animation_time 300 # in ms
+
+  # Helpers
+  @score_png "./resources/images/Score.png"
+  @digits_path "./resources/images/digits/"
 
   #############
   # Interface #
@@ -33,7 +37,7 @@ defmodule Panacea.Snake.Game do
   end
 
   def init(_) do
-    initial_positions = [{5, 0}, {4, 0}, {3, 0}, {2, 0}, {1, 0}, {0, 0}]
+    initial_positions = [{3, 0}, {2, 0}, {1, 0}, {0, 0}]
 
     initial_state = %{
       positions: initial_positions,
@@ -41,6 +45,7 @@ defmodule Panacea.Snake.Game do
       ate_apple_on_last_move?: false,
       current_direction: "RIGHT",
       next_direction: "RIGHT",
+      score: 0,
       over?: false
     }
 
@@ -90,9 +95,13 @@ defmodule Panacea.Snake.Game do
 
   def handle_cast({:game_over}, state) do
     Worker.reset_if_running()
+
     for _<- 1..3 do
       display_game_over_animation(state.positions)
     end
+
+    display_score(state.score)
+
     {:noreply, state}
   end
 
@@ -103,6 +112,7 @@ defmodule Panacea.Snake.Game do
       apple: apple,
       next_direction: next_direction,
       ate_apple_on_last_move?: ate_apple_on_last_move?,
+      score: score,
       over?: over?
     } = state
 
@@ -130,10 +140,10 @@ defmodule Panacea.Snake.Game do
         {previous_tail_x, previous_tail_y} = Enum.at(positions, -1)
 
         ate_apple_on_this_move? = apple == Enum.at(new_positions, 0)
-        new_apple = if ate_apple_on_this_move? do
-          generate_apple_position(new_positions)
+        {new_apple, new_score} = if ate_apple_on_this_move? do
+          {generate_apple_position(new_positions), score + 1}
         else
-          apple
+          {apple, score}
         end
 
         Worker.execute(
@@ -154,7 +164,8 @@ defmodule Panacea.Snake.Game do
           positions: new_positions,
           current_direction: next_direction,
           apple: new_apple,
-          ate_apple_on_last_move?: ate_apple_on_this_move?
+          ate_apple_on_last_move?: ate_apple_on_this_move?,
+          score: new_score
         }
 
         loop()
@@ -244,5 +255,32 @@ defmodule Panacea.Snake.Game do
       end
     )
     Process.sleep(2 * @animation_time)
+  end
+
+  defp display_score(score) do
+    digits = Integer.digits(score)
+    digit_count = length(digits)
+
+    digits_display = digits
+    |> Enum.with_index(fn digit, index -> {index, digit} end)
+    |> Enum.map(fn {index, digit} ->
+      png_file = "#{@digits_path}#{digit}.png"
+      index_from_last = digit_count - 1 - index
+      x_offset =
+        case index_from_last do
+          0 -> 13
+          1 -> 8
+          2 -> 3
+        end
+      {png_file, {x_offset, 9}}
+    end)
+
+    Worker.execute(
+      fn ->
+        Leds.light_all(@background_color)
+        Leds.display_png(@score_png)
+        Enum.each(digits_display, fn {file, offset} -> Leds.display_png(file, offset) end)
+      end
+    )
   end
  end

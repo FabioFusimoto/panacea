@@ -2,7 +2,7 @@ defmodule Panacea.Leds do
   alias Panacea.Commands, as: Commands
   alias Panacea.Png, as: Png
 
-  @dialyzer {:nowarn_function, [display_png: 1]}
+  @dialyzer {:nowarn_function, display_png: 1, display_png: 2}
 
   def show_leds() do
     Commands.write!("SHO")
@@ -13,21 +13,21 @@ defmodule Panacea.Leds do
   end
 
   def light_single(color, x, y) do
-    Commands.write!("ONE",color |> List.insert_at(0, y) |> List.insert_at(0, x))
+    Commands.write!("ONE", color |> List.insert_at(0, y) |> List.insert_at(0, x))
     :ok
   end
 
-  def light_matrix(frame) do
+  def light_matrix(frame, {x_offset, y_offset} \\ {0, 0}) do
     for y <- 0..(length(frame) - 1), x <- 0..(length(Enum.at(frame, y)) - 1) do
       color = Png.color_for(frame, x, y)
-      light_single(color, x, y)
+      light_single(color, x + x_offset, y + y_offset)
     end
     show_leds()
   end
 
-  def display_png(filename) do
+  def display_png(filename, offset \\ {0, 0}) do
     frame = Png.read_image(filename)
-    light_matrix(frame)
+    light_matrix(frame, offset)
   end
 
   @doc """

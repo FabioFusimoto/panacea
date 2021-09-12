@@ -27,8 +27,6 @@ defmodule PanaceaWeb.SnakeLive do
         Controls.left()
       k when k in ["d", "D"] ->
         Controls.right()
-      " " ->
-        Controls.update()
       _ ->
         nil
     end

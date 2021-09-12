@@ -8,6 +8,4 @@ defmodule Panacea.Snake.Controls do
   def left(), do: Game.set_next_direction("LEFT")
 
   def right(), do: Game.set_next_direction("RIGHT")
-
-  def update(), do: Game.update()
 end

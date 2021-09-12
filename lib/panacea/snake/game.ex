@@ -7,8 +7,10 @@ defmodule Panacea.Snake.Game do
   # Game related attributes
   @background_color [0, 0, 0]
   @snake_color [0, 255, 0]
+  @apple_color [255, 0, 0]
   @width 18
   @height 18
+  @game_timeout 125
   @animation_time 750 # in ms
 
   #############
@@ -31,8 +33,12 @@ defmodule Panacea.Snake.Game do
   end
 
   def init(_) do
+    initial_positions = [{5, 0}, {4, 0}, {3, 0}, {2, 0}, {1, 0}, {0, 0}]
+
     initial_state = %{
-      positions: [{5, 0}, {4, 0}, {3, 0}, {2, 0}, {1, 0}, {0, 0}],
+      positions: initial_positions,
+      apple: generate_apple_position(initial_positions),
+      ate_apple_on_last_move?: false,
       current_direction: "RIGHT",
       next_direction: "RIGHT",
       over?: false
@@ -42,9 +48,13 @@ defmodule Panacea.Snake.Game do
       fn ->
         Leds.light_all(@background_color)
         Enum.each(initial_state.positions, fn {x, y} -> Leds.light_single(@snake_color, x, y)  end)
+        Leds.light_single(@apple_color, elem(initial_state.apple, 0), elem(initial_state.apple, 1))
         Leds.show_leds()
       end
     )
+
+    # Automatically update it's state in a loop
+    loop()
 
     {:ok, initial_state}
   end
@@ -55,10 +65,6 @@ defmodule Panacea.Snake.Game do
 
   def set_next_direction(next_direction) do
     GenServer.cast(__MODULE__, {:set_next_direction, next_direction})
-  end
-
-  def update() do
-    GenServer.cast(__MODULE__, {:update_game})
   end
 
   ############
@@ -90,11 +96,13 @@ defmodule Panacea.Snake.Game do
     {:noreply, state}
   end
 
-  def handle_cast({:update_game}, state) do
+  def handle_info(:update_game, state) do
 
     %{
       positions: positions,
+      apple: apple,
       next_direction: next_direction,
+      ate_apple_on_last_move?: ate_apple_on_last_move?,
       over?: over?
     } = state
 
@@ -112,20 +120,46 @@ defmodule Panacea.Snake.Game do
         )
         {:noreply, %{state | over?: true}}
       else
+        new_positions = if ate_apple_on_last_move? do
+          List.insert_at(new_positions, -1, Enum.at(positions, -1))
+        else
+          new_positions
+        end
+
         {new_head_x, new_head_y} = Enum.at(new_positions, 0)
-        {previous_tail_x, previous_tail_y} = Enum.at(positions, length(positions) - 1)
+        {previous_tail_x, previous_tail_y} = Enum.at(positions, -1)
+
+        ate_apple_on_this_move? = apple == Enum.at(new_positions, 0)
+        new_apple = if ate_apple_on_this_move? do
+          generate_apple_position(new_positions)
+        else
+          apple
+        end
 
         Worker.execute(
           fn ->
-            if {previous_tail_x, previous_tail_y} != {new_head_x, new_head_y} do
-              Leds.light_single(@background_color, previous_tail_x, previous_tail_y)
-              Leds.light_single(@snake_color, new_head_x, new_head_y)
-              Leds.show_leds()
+            if ate_apple_on_this_move? do
+              Leds.light_single(@apple_color, elem(new_apple, 0), elem(new_apple, 1))
             end
+            if !ate_apple_on_last_move? do
+              Leds.light_single(@background_color, previous_tail_x, previous_tail_y)
+            end
+            Leds.light_single(@snake_color, new_head_x, new_head_y)
+            Leds.show_leds()
           end
         )
 
-        {:noreply, %{state | positions: new_positions, current_direction: next_direction}}
+        new_state = %{
+          state |
+          positions: new_positions,
+          current_direction: next_direction,
+          apple: new_apple,
+          ate_apple_on_last_move?: ate_apple_on_this_move?
+        }
+
+        loop()
+
+        {:noreply, new_state}
       end
     end
   end
@@ -134,7 +168,15 @@ defmodule Panacea.Snake.Game do
   # Helpers #
   ###########
 
-  defp ongoing_game, do: Process.whereis(__MODULE__)
+  defp ongoing_game(), do: Process.whereis(__MODULE__)
+
+  defp loop(), do: Process.send_after(self(), :update_game, @game_timeout)
+
+  defp generate_apple_position(snake_positions) do
+    MapSet.new(for x <- 0..(@width - 1), y <- 0..(@height - 1) do {x, y} end)
+    |> MapSet.difference(MapSet.new(snake_positions))
+    |> Enum.random
+  end
 
   defp check_for_collision(head, positions_except_head), do: head in positions_except_head
 

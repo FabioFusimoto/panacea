@@ -4,5 +4,22 @@
     <button phx-click="start_game">Start!</button>
 <% else %>
     <button phx-click="stop_game">Stop!</button>
-    <div id="game" class="game-window" phx-window-keydown="handle_key">
+
+    <table id="game" class="game-window" phx-window-keydown="handle_key">
+        <tr/>
+        <%= for x <- 0..(@height - 1) do %>
+            <tr>
+                <%= for y <- 0..(@width - 1) do %>
+                    <%= case (Enum.at(@cells_content, y) |> Enum.at(x)) do %>
+                        <%= "snake" -> %>
+                            <td class="snake-cell">
+                        <%= "apple" -> %>
+                            <td class="apple-cell">
+                        <%= "empty" -> %>
+                            <td class="empty-cell">
+                        <% end %>
+                <% end %>
+            </tr>
+        <% end %>
+    </table>
 <% end %>

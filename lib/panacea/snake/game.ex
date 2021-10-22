@@ -3,8 +3,11 @@ defmodule Panacea.Snake.Game do
 
   alias Panacea.Leds, as: Leds
   alias Panacea.Worker, as: Worker
+  alias Phoenix.PubSub
 
-  # Game related attributes
+  ###########################
+  # Game related attributes #
+  ###########################
   @background_color [0, 0, 0]
   @snake_color [0, 255, 0]
   @apple_color [255, 0, 0]
@@ -13,14 +16,16 @@ defmodule Panacea.Snake.Game do
   @game_timeout 125
   @animation_time 300 # in ms
 
-  # Helpers
+  ###########
+  # Helpers #
+  ###########
   @score_png "./resources/images/Score.png"
   @digits_path "./resources/images/digits/"
+  @topic "snake"
 
   #############
   # Interface #
   #############
-
   def start() do
     if ongoing_game() do
       GenServer.stop(__MODULE__)
@@ -75,7 +80,6 @@ defmodule Panacea.Snake.Game do
   ############
   # Handlers #
   ############
-
   def handle_call({:current_direction}, _, state), do: {:reply, state.current_direction, state}
 
   def handle_cast({:set_next_direction, next_direction}, state) do
@@ -106,7 +110,6 @@ defmodule Panacea.Snake.Game do
   end
 
   def handle_info(:update_game, state) do
-
     %{
       positions: positions,
       apple: apple,
@@ -170,6 +173,18 @@ defmodule Panacea.Snake.Game do
 
         loop()
 
+        PubSub.broadcast(
+          Panacea.PubSub,
+          @topic,
+          %{
+            topic: @topic,
+            payload: %{
+              snake_positions: new_positions,
+              apple_position: new_apple
+            }
+          }
+        )
+
         {:noreply, new_state}
       end
     end
@@ -178,7 +193,6 @@ defmodule Panacea.Snake.Game do
   ###########
   # Helpers #
   ###########
-
   defp ongoing_game(), do: Process.whereis(__MODULE__)
 
   defp loop(), do: Process.send_after(self(), :update_game, @game_timeout)

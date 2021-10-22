@@ -2,9 +2,31 @@ defmodule PanaceaWeb.SnakeLive do
   use PanaceaWeb, :live_view
   alias Panacea.Snake.Game, as: Game
   alias Panacea.Snake.Controls, as: Controls
+  alias Phoenix.PubSub
+
+  @height 18
+  @width 18
+  @topic "snake"
 
   def mount(_params, _assigns, socket) do
-    {:ok, assign(socket, started: false)}
+    PubSub.subscribe(Panacea.PubSub, @topic)
+
+    initial_cells_content = for _ <- 0..(@height - 1) do
+      for _ <- 0..(@width - 1) do
+        "empty"
+      end
+    end
+
+    {
+      :ok,
+      assign(
+        socket,
+        started: false,
+        cells_content: initial_cells_content,
+        width: @width,
+        height: @height
+      )
+    }
   end
 
   def handle_event("start_game", _value, socket) do
@@ -32,5 +54,33 @@ defmodule PanaceaWeb.SnakeLive do
     end
 
     {:noreply, socket}
+  end
+
+  def handle_info(%{topic: @topic, payload: payload}, socket) do
+    %{snake_positions: snake_positions, apple_position: apple_position} = payload
+
+    cells_content = for x <- 0..(@height - 1) do
+      for y <- 0..(@width - 1) do
+        cell_content(
+          x,
+          y,
+          snake_positions,
+          apple_position
+        )
+      end
+    end
+
+    {:noreply, assign(socket, cells_content: cells_content)}
+  end
+
+  defp cell_content(x, y, snake_positions, apple_position) do
+    cond do
+      Enum.member?(snake_positions, {x, y}) ->
+        "snake"
+      {x, y} == apple_position ->
+        "apple"
+      true ->
+        "empty"
+    end
   end
 end

@@ -19,8 +19,6 @@ defmodule PanaceaWeb.Router do
 
     live "/", PageLive, :index
 
-    live "/rng", RngLive, :index
-
     live "/arduino", ArduinoLive, :index
 
     live "/png", PngLive, :index

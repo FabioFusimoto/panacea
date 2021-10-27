@@ -1,19 +1,21 @@
 <h2>Send command</h2>
 
 <%= if @selected_command == "" do %>
-    <%= f = form_for(:command_selection, "#", [phx_submit: :command_selected]) %>
     <div>
-        <%= label(f, "Pick a command") %>
-        <%= select(f, :command, @commands) %>
+        <.form let={f} phx_submi="command_selected">
 
-        <%= submit("Select command") %>
+            <%= label(f, "Pick a command") %>
+            <%= select(f, :command, @commands) %>
+
+            <%= submit("Select command") %>
+        </.form>
     </div>
-    </form>
 <% else %>
     <p>Selected command: <%= @selected_command %></p>
-    <%= f = form_for(:submit, "#", [phx_submit: :submitted]) %>
+
     <div>
-        <div>
+        <.form let={f} phx_submit="submitted">
+
             <div style="display: none;">
                 <%= label(f, :command) %>
                 <%= text_input(f, :command, value: @selected_command) %>
@@ -24,9 +26,9 @@
                     <%= number_input(f, arg, value: 0) %>
                 </div>
             <% end %>
-        </div>
 
-        <%= submit("Send command") %>
+            <%= submit("Send command") %>
+
+        </.form>
     </div>
-    </form>
 <% end %>

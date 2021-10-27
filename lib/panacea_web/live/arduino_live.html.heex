@@ -1,18 +1,12 @@
 <h2>Send command</h2>
+<div>
+    <.form let={f} for={:command_selected} phx_change="command_selected">
+        <%= label(f, "Pick a command") %>
+        <%= select(f, :command, @command_labels) %>
+    </.form>
+</div>
 
-<%= if @selected_command == "" do %>
-    <div>
-        <.form let={f} for={:command_selected} phx_submit="command_selected">
-
-            <%= label(f, "Pick a command") %>
-            <%= select(f, :command, @commands) %>
-
-            <%= submit("Select command") %>
-        </.form>
-    </div>
-<% else %>
-    <p>Selected command: <%= @selected_command %></p>
-
+<%= if @selected_command do %>
     <div>
         <.form let={f} for={:submitted} phx_submit="submitted">
 
@@ -20,7 +14,7 @@
                 <%= label(f, :command) %>
                 <%= text_input(f, :command, value: @selected_command) %>
             </div>
-            <%= for arg <- @args do %>
+            <%= for arg <- @selected_args do %>
                 <div class="inline-element">
                     <%= label(f, arg) %>
                     <%= number_input(f, arg, value: 0) %>

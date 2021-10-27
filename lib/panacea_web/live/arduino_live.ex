@@ -2,44 +2,54 @@ defmodule PanaceaWeb.ArduinoLive do
   use PanaceaWeb, :live_view
   alias Panacea.Worker, as: Worker
 
-  @default_command "Select a command"
-
-  defp available_commands(), do: Panacea.Commands.list()
-
-  defp build_command_list() do
-    available_commands()
-    |> Map.keys()
-    |> Enum.sort()
-    |> List.insert_at(0, @default_command)
-  end
-
-  defp build_argument_list(command, form) do
-    arg_labels = available_commands()[command]
-    Enum.map(arg_labels, &(form[&1]))
-  end
-
   def mount(_params, _assigns, socket) do
-    {:ok, assign(socket, commands: build_command_list(), args: [], selected_command: "")}
+    command_map = Panacea.Commands.list()
+    command_labels = command_map |> Map.keys() |> Enum.sort()
+    initial_command = Enum.at(command_labels, 0)
+    initial_args = command_map[initial_command]
+    {:ok,
+     assign(
+       socket,
+       command_map: command_map,
+       command_labels: command_labels,
+       selected_command: initial_command,
+       selected_args: initial_args
+     )
+    }
   end
 
   def handle_event("command_selected", %{"command_selected" => %{"command" => command}}, socket) do
-    args = available_commands()[command]
-    updated_socket = socket
-    |> assign(selected_command: command, args: args)
-    |> clear_flash()
+    command_map = socket.assigns.command_map
+    args = command_map[command]
+    updated_socket = assign(
+      socket,
+      selected_command: command,
+      selected_args: args
+    )
 
     {:noreply, updated_socket}
   end
 
   def handle_event("submitted", %{"submitted" => form}, socket) do
-    command = form["command"]
-    arg_list = build_argument_list(command, form)
+    %{
+      selected_command: selected_command,
+      selected_args: arg_labels
+    } = socket.assigns
 
-    Worker.execute(fn -> Panacea.Commands.write!(command, arg_list) end)
+    arg_values = Enum.map(arg_labels, &(form[&1]))
 
-    updated_socket = socket
-    |> assign(commands: build_command_list(), args: [], selected_command: "")
-    |> put_flash(:info, "Command #{command} excecuted with args #{inspect(arg_list)}")
+    Worker.execute(
+      fn ->
+        Panacea.Commands.write!(selected_command, arg_values)
+      end
+    )
+
+    updated_socket = put_flash(
+      socket,
+      :info,
+      "Command #{selected_command} excecuted with args #{inspect(arg_values)}"
+    )
+
     {:noreply, updated_socket}
   end
 end

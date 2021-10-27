@@ -2,7 +2,7 @@
 
 <%= if @selected_command == "" do %>
     <div>
-        <.form let={f} phx_submi="command_selected">
+        <.form let={f} for={:command_selected} phx_submit="command_selected">
 
             <%= label(f, "Pick a command") %>
             <%= select(f, :command, @commands) %>
@@ -14,7 +14,7 @@
     <p>Selected command: <%= @selected_command %></p>
 
     <div>
-        <.form let={f} phx_submit="submitted">
+        <.form let={f} for={:submitted} phx_submit="submitted">
 
             <div style="display: none;">
                 <%= label(f, :command) %>

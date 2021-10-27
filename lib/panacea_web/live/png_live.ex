@@ -10,7 +10,7 @@ defmodule PanaceaWeb.PngLive do
 
   def handle_event(
     "display_png",
-    %{"image_path" => path, "x_offset" => x_offset, "y_offset" => y_offset},
+    %{"display_png" => %{"image_path" => path, "x_offset" => x_offset, "y_offset" => y_offset}},
     socket
   ) do
     offset = {String.to_integer(x_offset), String.to_integer(y_offset)}
@@ -20,9 +20,13 @@ defmodule PanaceaWeb.PngLive do
 
   def handle_event(
     "display_gif",
-    %{"gif_path" => path,
-      "target_fps" => fps,
-      "repetitions" => repetitions},
+    %{
+      "display_gif" => %{
+        "gif_path" => path,
+        "target_fps" => fps,
+        "repetitions" => repetitions
+      }
+    },
     socket
   ) do
     Worker.execute(fn -> Panacea.Leds.display_gif(path, String.to_integer(fps), String.to_integer(repetitions)) end)

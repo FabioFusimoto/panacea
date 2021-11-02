@@ -24,7 +24,7 @@ defmodule Panacea.MixProject do
     ]
   end
 
-  # Specifies which paths to compile per environment.
+  # Specifies which paths to compile per environment.q
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
@@ -34,11 +34,11 @@ defmodule Panacea.MixProject do
   defp deps do
     [
       {:phoenix, "~> 1.6.2"},
-      {:phoenix_live_view, "~> 0.17.2"},
+      {:phoenix_live_view, "~> 0.16.0"},
       {:floki, ">= 0.30.0", only: :test},
-      {:phoenix_html, "~> 3.1.0"},
+      {:phoenix_html, "~> 3.0.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_dashboard, "~> 0.6.0"},
+      {:phoenix_live_dashboard, "~> 0.5.3"},
       {:telemetry_metrics, "~> 0.6.1"},
       {:telemetry_poller, "~> 1.0.0"},
       {:gettext, "~> 0.11"},
@@ -47,7 +47,8 @@ defmodule Panacea.MixProject do
       {:circuits_uart, "~> 1.3"},
       {:imagineer, "~> 0.3.3"},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
-      {:esbuild, "~> 0.2", runtime: Mix.env() == :dev}
+      {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
+      {:surface, "~> 0.6.0"}
     ]
   end
 

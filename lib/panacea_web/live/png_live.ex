@@ -5,10 +5,13 @@ defmodule PanaceaWeb.PngLive do
   alias Surface.Components.Form.Field
   alias Surface.Components.Form.Label
   alias Surface.Components.Form.NumberInput
+  alias Surface.Components.Form.Select
   alias Surface.Components.Form.Submit
-  alias Surface.Components.Form.TextInput
 
   alias Panacea.Worker, as: Worker
+
+  @images_path "./resources/images/"
+  @gifs_path "./resources/gifs/"
 
   @dialyzer {:nowarn_function, [handle_event: 3]}
 
@@ -20,7 +23,7 @@ defmodule PanaceaWeb.PngLive do
         <Form for={:display_png} submit="display_png">
             <Field name="image_path">
                 <Label>Image</Label>
-                <TextInput name="image_path"/>
+                <Select name="image_path" options={@images}/>
             </Field>
 
             <div class="inline-element">
@@ -41,14 +44,14 @@ defmodule PanaceaWeb.PngLive do
 
         <Form for={:display_gif} submit="display_gif">
             <Field name="gif_path">
-                <Label>GIF Path</Label>
-                <TextInput name="gif_path"/>
+                <Label>GIF</Label>
+                <Select name="gif_path" options={@gifs}/>
             </Field>
 
             <div class="inline-element">
                 <Field name="target_fps">
                     <Label>Target FPS</Label>
-                    <NumberInput name="target_fps" value={8}/>
+                    <NumberInput name="target_fps" value={6}/>
                 </Field>
             </div>
 
@@ -64,8 +67,36 @@ defmodule PanaceaWeb.PngLive do
     """
   end
 
+  defp png_option(png_directory) do
+    png_filename = png_directory |> String.split("/") |> Enum.at(-1) |> String.split(".") |> Enum.at(0)
+    [
+      key: png_filename,
+      value: png_directory
+    ]
+  end
+
+  defp gif_option(gif_folder) do
+    directory = @gifs_path <> gif_folder <> "/"
+    expression = directory <> "*.png"
+    frames = expression |> Path.wildcard |> Enum.count
+
+    [
+      key: "#{gif_folder} - #{frames} frames",
+      value: directory
+    ]
+  end
+
   def mount(_params, _assigns, socket) do
-    {:ok, socket}
+    images = Path.wildcard(@images_path <> "*.png")
+    {:ok, gifs} = File.ls(@gifs_path)
+
+    {:ok,
+     assign(
+       socket,
+       images: Enum.map(images, &png_option/1),
+       gifs: Enum.map(gifs, &gif_option/1)
+      )
+    }
   end
 
   def handle_event(

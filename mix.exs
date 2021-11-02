@@ -7,7 +7,7 @@ defmodule Panacea.MixProject do
       version: "0.1.0",
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
+      compilers: [:phoenix, :gettext] ++ Mix.compilers() ++ [:surface],
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps()
@@ -48,7 +48,8 @@ defmodule Panacea.MixProject do
       {:imagineer, "~> 0.3.3"},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
-      {:surface, "~> 0.6.0"}
+      {:surface, "~> 0.6.0"},
+      {:surface_formatter, "~> 0.6.0"}
     ]
   end
 

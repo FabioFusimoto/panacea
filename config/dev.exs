@@ -41,11 +41,12 @@ config :panacea, PanaceaWeb.Endpoint,
 
 # Watch static and templates for browser reloading.
 config :panacea, PanaceaWeb.Endpoint,
+  reloadable_compilers: [:gettext, :elixir, :surface],
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/panacea_web/(live|views)/.*(ex)$",
+      ~r"lib/panacea_web/(live|views|components)/.*(ex|sface|js)$",
       ~r"lib/panacea_web/templates/.*(eex)$"
     ]
   ]

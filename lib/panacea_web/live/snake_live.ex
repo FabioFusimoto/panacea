@@ -1,5 +1,9 @@
 defmodule PanaceaWeb.SnakeLive do
-  use PanaceaWeb, :live_view
+  use Surface.LiveView
+
+  alias Surface.Components.Form
+  alias Surface.Components.Form.Submit
+
   alias Panacea.Snake.Game, as: Game
   alias Panacea.Snake.Controls, as: Controls
   alias Phoenix.PubSub
@@ -7,6 +11,45 @@ defmodule PanaceaWeb.SnakeLive do
   @height 18
   @width 18
   @topic "snake"
+
+  def render(assigns) do
+    ~F"""
+    <section class="container">
+        <h2>Snake</h2>
+
+        {#if !@started}
+
+        <Form for={:start_game} submit="start_game">
+            <Submit>Start!</Submit>
+        </Form>
+
+        {#else}
+
+            <Form for={:stop_game} submit="stop_game">
+                <Submit>Stop!</Submit>
+            </Form>
+            <table id="game" class="game-window" phx-window-keydown="handle_key">
+                <tr/>
+                {#for x <- 0..(@height - 1)}
+                    <tr>
+                        {#for y <- 0..(@width - 1)}
+                            {#case Enum.at(@cells_content, y) |> Enum.at(x)}
+                                {#match "snake"}
+                                    <td class="snake-cell"/>
+                                {#match "apple"}
+                                    <td class="apple-cell"/>
+                                {#match "empty"}
+                                    <td class="empty-cell"/>
+                            {/case}
+                        {/for}
+                    </tr>
+                {/for}
+            </table>
+
+        {/if}
+    </section>
+    """
+  end
 
   def mount(_params, _assigns, socket) do
     PubSub.subscribe(Panacea.PubSub, @topic)

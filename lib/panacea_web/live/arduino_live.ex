@@ -1,36 +1,40 @@
 defmodule PanaceaWeb.ArduinoLive do
-  use PanaceaWeb, :live_view
+  use Surface.LiveView
+
+  alias Surface.Components.Form
+  alias Surface.Components.Form.Field
+  alias Surface.Components.Form.Label
+  alias Surface.Components.Form.NumberInput
+  alias Surface.Components.Form.Select
+  alias Surface.Components.Form.Submit
+
   alias Panacea.Worker, as: Worker
 
   def render(assigns) do
-    ~H"""
-    <h2>Send command</h2>
-    <div>
-        <.form let={f} for={:command_selected} phx_change="command_selected">
-            <%= label(f, "Pick a command") %>
-            <%= select(f, :command, @command_labels) %>
-        </.form>
-    </div>
-
-    <%= if @selected_command do %>
+    ~F"""
+    <section class="container">
+        <h2>Send command</h2>
         <div>
-            <.form let={f} for={:submitted} phx_submit="submitted">
-                <div style="display: none;">
-                    <%= label(f, :command) %>
-                    <%= text_input(f, :command, value: @selected_command) %>
-                </div>
-                <%= for arg <- @selected_args do %>
+            <Form for={:command_selected} change="command_selected">
+                <Field name="command_selected">
+                    <Label>
+                        Pick a command
+                    </Label>
+                    <Select name="command" options={@command_labels} />
+                </Field>
+            </Form>
+
+            <Form for={:submitted} submit="submitted">
+                {#for arg <- @selected_args}
                     <div class="inline-element">
-                        <%= label(f, arg) %>
-                        <%= number_input(f, arg, value: 0) %>
+                        <Label>{arg}</Label>
+                        <NumberInput name={arg} value="0" />
                     </div>
-                <% end %>
-
-                <%= submit("Send command") %>
-
-            </.form>
+                {/for}
+                <Submit>Send command</Submit>
+            </Form>
         </div>
-    <% end %>
+    </section>
     """
   end
 
@@ -50,7 +54,7 @@ defmodule PanaceaWeb.ArduinoLive do
     }
   end
 
-  def handle_event("command_selected", %{"command_selected" => %{"command" => command}}, socket) do
+  def handle_event("command_selected", %{"command" => command}, socket) do
     command_map = socket.assigns.command_map
     args = command_map[command]
     updated_socket = assign(
@@ -62,7 +66,7 @@ defmodule PanaceaWeb.ArduinoLive do
     {:noreply, updated_socket}
   end
 
-  def handle_event("submitted", %{"submitted" => form}, socket) do
+  def handle_event("submitted", form, socket) do
     %{
       selected_command: selected_command,
       selected_args: arg_labels
@@ -76,12 +80,6 @@ defmodule PanaceaWeb.ArduinoLive do
       end
     )
 
-    updated_socket = put_flash(
-      socket,
-      :info,
-      "Command #{selected_command} excecuted with args #{inspect(arg_values)}"
-    )
-
-    {:noreply, updated_socket}
+    {:noreply, socket}
   end
 end

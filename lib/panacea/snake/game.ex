@@ -13,8 +13,8 @@ defmodule Panacea.Snake.Game do
   @apple_color [255, 0, 0]
   @width 18
   @height 18
-  @game_timeout 125
-  @animation_time 300 # in ms
+  @default_game_timeout 125
+  @animation_time 600 # in ms
 
   ###########
   # Helpers #
@@ -27,12 +27,16 @@ defmodule Panacea.Snake.Game do
   # Interface #
   #############
   def start() do
+    start(@default_game_timeout)
+  end
+
+  def start(timeout) do
     if ongoing_game() do
       GenServer.stop(__MODULE__)
     end
 
     Worker.reset_if_running()
-    GenServer.start(__MODULE__, nil, name: __MODULE__)
+    GenServer.start(__MODULE__, timeout, name: __MODULE__)
   end
 
   def stop() do
@@ -41,7 +45,15 @@ defmodule Panacea.Snake.Game do
     end
   end
 
-  def init(_) do
+  def get_current_direction() do
+    GenServer.call(__MODULE__, {:current_direction})
+  end
+
+  def set_next_direction(next_direction) do
+    GenServer.cast(__MODULE__, {:set_next_direction, next_direction})
+  end
+
+  def init(timeout) do
     initial_positions = [{3, 0}, {2, 0}, {1, 0}, {0, 0}]
 
     initial_state = %{
@@ -50,6 +62,7 @@ defmodule Panacea.Snake.Game do
       ate_apple_on_last_move?: false,
       current_direction: "RIGHT",
       next_direction: "RIGHT",
+      timeout: timeout,
       score: 0,
       over?: false
     }
@@ -64,17 +77,9 @@ defmodule Panacea.Snake.Game do
     )
 
     # Automatically update it's state in a loop
-    loop()
+    loop(timeout)
 
     {:ok, initial_state}
-  end
-
-  def get_current_direction() do
-    GenServer.call(__MODULE__, {:current_direction})
-  end
-
-  def set_next_direction(next_direction) do
-    GenServer.cast(__MODULE__, {:set_next_direction, next_direction})
   end
 
   ############
@@ -116,6 +121,7 @@ defmodule Panacea.Snake.Game do
       next_direction: next_direction,
       ate_apple_on_last_move?: ate_apple_on_last_move?,
       score: score,
+      timeout: timeout,
       over?: over?
     } = state
 
@@ -171,7 +177,7 @@ defmodule Panacea.Snake.Game do
           score: new_score
         }
 
-        loop()
+        loop(timeout)
 
         PubSub.broadcast(
           Panacea.PubSub,
@@ -195,7 +201,7 @@ defmodule Panacea.Snake.Game do
   ###########
   defp ongoing_game(), do: Process.whereis(__MODULE__)
 
-  defp loop(), do: Process.send_after(self(), :update_game, @game_timeout)
+  defp loop(timeout), do: Process.send_after(self(), :update_game, timeout)
 
   defp generate_apple_position(snake_positions) do
     MapSet.new(for x <- 0..(@width - 1), y <- 0..(@height - 1) do {x, y} end)

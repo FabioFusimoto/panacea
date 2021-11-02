@@ -2,10 +2,16 @@ defmodule PanaceaWeb.SnakeLive do
   use Surface.LiveView
 
   alias Surface.Components.Form
+  alias Surface.Components.Form.Checkbox
+  alias Surface.Components.Form.Field
+  alias Surface.Components.Form.Label
+  alias Surface.Components.Form.Select
   alias Surface.Components.Form.Submit
 
-  alias Panacea.Snake.Game, as: Game
-  alias Panacea.Snake.Controls, as: Controls
+  alias Panacea.Snake.Game
+  alias Panacea.Snake.Controls
+  alias Panacea.Snake.Autopilot
+
   alias Phoenix.PubSub
 
   @height 18
@@ -20,6 +26,18 @@ defmodule PanaceaWeb.SnakeLive do
         {#if !@started}
 
         <Form for={:start_game} submit="start_game">
+            <div class="inline-element">
+                <Field name="speed">
+                    <Label>Speed</Label>
+                    <Select name="speed" options={@speeds}/>
+                </Field>
+            </div>
+            <div class="inline-element">
+                <Field name="autopilot">
+                    <Label>Autopilot?</Label>
+                    <Checkbox name="autopilot"/>
+                </Field>
+            </div>
             <Submit>Start!</Submit>
         </Form>
 
@@ -60,11 +78,35 @@ defmodule PanaceaWeb.SnakeLive do
       end
     end
 
+    speeds = [
+      [
+        key: 1,
+        value: 1000
+      ],
+      [
+        key: 2,
+        value: 150
+      ],
+      [
+        key: 3,
+        value: 100
+      ],
+      [
+        key: 4,
+        value: 75
+      ],
+      [
+        key: 5,
+        value: 50
+      ],
+    ]
+
     {
       :ok,
       assign(
         socket,
         started: false,
+        speeds: speeds,
         cells_content: initial_cells_content,
         width: @width,
         height: @height
@@ -72,28 +114,39 @@ defmodule PanaceaWeb.SnakeLive do
     }
   end
 
-  def handle_event("start_game", _value, socket) do
-    Game.start()
-    {:noreply, assign(socket, started: true)}
+  def handle_event("start_game", %{"speed" => speed, "autopilot" => autopilot}, socket) do
+    autopilot? = autopilot == "true"
+    if autopilot? do
+      Autopilot.start()
+    end
+
+    Game.start(String.to_integer(speed))
+    {:noreply, assign(socket, started: true, autopilot?: autopilot?)}
   end
 
   def handle_event("stop_game", _value, socket) do
+    if socket.assigns.autopilot? do
+      Autopilot.stop()
+    end
+
     Game.stop()
     {:noreply, assign(socket, started: false)}
   end
 
   def handle_event("handle_key", %{"key" => key}, socket) do
-    case key do
-      k when k in ["w", "W"] ->
-        Controls.up()
-      k when k in ["s", "S"] ->
-        Controls.down()
-      k when k in ["a", "A"] ->
-        Controls.left()
-      k when k in ["d", "D"] ->
-        Controls.right()
-      _ ->
-        nil
+    if !socket.assigns.autopilot? do
+      case key do
+        k when k in ["w", "W"] ->
+          Controls.up()
+        k when k in ["s", "S"] ->
+          Controls.down()
+        k when k in ["a", "A"] ->
+          Controls.left()
+        k when k in ["d", "D"] ->
+          Controls.right()
+        _ ->
+          nil
+      end
     end
 
     {:noreply, socket}

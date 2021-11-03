@@ -25,21 +25,27 @@ defmodule PanaceaWeb.SnakeLive do
 
         {#if !@started}
 
-        <Form for={:start_game} submit="start_game">
-            <div class="inline-element">
-                <Field name="speed">
-                    <Label>Speed</Label>
-                    <Select name="speed" options={@speeds}/>
-                </Field>
-            </div>
-            <div class="inline-element">
-                <Field name="autopilot">
-                    <Label>Autopilot?</Label>
-                    <Checkbox name="autopilot"/>
-                </Field>
-            </div>
-            <Submit>Start!</Submit>
-        </Form>
+            <Form for={:start_game} submit="start_game">
+                <div class="inline-element">
+                    <Field name="speed">
+                        <Label>Speed</Label>
+                        <Select name="speed" options={@speeds}/>
+                    </Field>
+                </div>
+                <div class="inline-element">
+                    <Field name="autopilot">
+                        <Label>Autopilot?</Label>
+                        <Checkbox name="autopilot"/>
+                    </Field>
+                </div>
+                <div class="inline-element">
+                    <Field name="loop">
+                        <Label>Loop?</Label>
+                        <Checkbox name="loop"/>
+                    </Field>
+                </div>
+                <Submit>Start!</Submit>
+            </Form>
 
         {#else}
 
@@ -114,10 +120,14 @@ defmodule PanaceaWeb.SnakeLive do
     }
   end
 
-  def handle_event("start_game", %{"speed" => speed, "autopilot" => autopilot}, socket) do
+  def handle_event("start_game", %{"speed" => speed, "autopilot" => autopilot, "loop" => loop}, socket) do
     autopilot? = autopilot == "true"
+    loop? = loop == "true"
+
+    speed_as_int = String.to_integer(speed)
+
     if autopilot? do
-      Autopilot.start()
+      Autopilot.start(%{loop?: loop?, speed: speed_as_int})
     end
 
     Game.start(String.to_integer(speed))

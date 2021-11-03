@@ -3,6 +3,7 @@ defmodule Panacea.Snake.Autopilot do
   alias Phoenix.PubSub
 
   alias Panacea.Snake.Controls
+  alias Panacea.Snake.Game
 
   @topic "snake"
   @width 18
@@ -11,8 +12,8 @@ defmodule Panacea.Snake.Autopilot do
   #############
   # Interface #
   #############
-  def start() do
-    GenServer.start(__MODULE__, nil, name: __MODULE__)
+  def start(init_params) do
+    GenServer.start(__MODULE__, init_params, name: __MODULE__)
   end
 
   def stop() do
@@ -21,15 +22,15 @@ defmodule Panacea.Snake.Autopilot do
     end
   end
 
-  def init(_) do
+  def init(init_params) do
     PubSub.subscribe(Panacea.PubSub, @topic)
-    {:ok, nil}
+    {:ok, init_params}
   end
 
   ############
   # Handlers #
   ############
-  def handle_info(%{topic: @topic, payload: payload}, socket) do
+  def handle_info(%{topic: @topic, payload: payload}, state) do
     %{
       snake_positions: snake_positions,
       apple_position: apple_position
@@ -63,9 +64,20 @@ defmodule Panacea.Snake.Autopilot do
         _ ->
           nil
       end
+    else
+      if state.loop? do
+        Process.send_after(self(), :restart_game, 15000)
+      end
     end
 
-    {:noreply, socket}
+    {:noreply, state}
+  end
+
+  def handle_info(:restart_game, state) do
+    Game.stop()
+    Process.sleep(100)
+    Game.start(state.speed)
+    {:noreply, state}
   end
 
   ###########

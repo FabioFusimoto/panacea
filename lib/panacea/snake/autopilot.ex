@@ -24,7 +24,7 @@ defmodule Panacea.Snake.Autopilot do
 
   def init(init_params) do
     PubSub.subscribe(Panacea.PubSub, @topic)
-    {:ok, init_params}
+    {:ok, Map.put(init_params, :restart_count, 0)}
   end
 
   ############
@@ -66,7 +66,7 @@ defmodule Panacea.Snake.Autopilot do
       end
     else
       if state.loop? do
-        Process.send_after(self(), :restart_game, 15000)
+        Process.send_after(self(), :restart_game, 10000)
       end
     end
 
@@ -74,10 +74,15 @@ defmodule Panacea.Snake.Autopilot do
   end
 
   def handle_info(:restart_game, state) do
+    IO.puts("Restarting game...")
+
     Game.stop()
-    Process.sleep(100)
+    Process.sleep(2000)
     Game.start(state.speed)
-    {:noreply, state}
+
+    IO.puts("Game restarted! - Restarts so far: #{state.restart_count}")
+
+    {:noreply, Map.put(state, :restart_count, (state.restart_count + 1))}
   end
 
   ###########

@@ -30,11 +30,16 @@ defmodule Panacea.Snake.Autopilot do
   ############
   # Handlers #
   ############
-  def handle_info(%{topic: @topic, payload: payload}, state) do
+  def handle_info(
     %{
-      snake_positions: snake_positions,
-      apple_position: apple_position
-    } = payload
+      topic: @topic,
+      payload: %{
+        snake_positions: snake_positions,
+        apple_position: apple_position
+      }
+    },
+    state
+  ) do
 
     possible_next_positions = empty_surroundings(snake_positions)
 
@@ -64,10 +69,23 @@ defmodule Panacea.Snake.Autopilot do
         _ ->
           nil
       end
-    else
-      if state.loop? do
-        Process.send_after(self(), :restart_game, 10000)
-      end
+    end
+
+    {:noreply, state}
+  end
+
+  def handle_info(
+    %{
+      topic: @topic,
+      payload: %{
+        collided?: collided?
+      }
+    },
+    state
+  ) do
+
+    if collided? and state.loop? do
+      Process.send_after(self(), :restart_game, 10000)
     end
 
     {:noreply, state}

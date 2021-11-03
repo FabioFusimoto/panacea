@@ -162,8 +162,16 @@ defmodule PanaceaWeb.SnakeLive do
     {:noreply, socket}
   end
 
-  def handle_info(%{topic: @topic, payload: payload}, socket) do
-    %{snake_positions: snake_positions, apple_position: apple_position} = payload
+  def handle_info(
+    %{
+      topic: @topic,
+      payload: %{
+        snake_positions: snake_positions,
+        apple_position: apple_position
+      }
+    },
+    socket
+  ) do
 
     cells_content = for x <- 0..(@height - 1) do
       for y <- 0..(@width - 1) do
@@ -177,6 +185,24 @@ defmodule PanaceaWeb.SnakeLive do
     end
 
     {:noreply, assign(socket, cells_content: cells_content)}
+  end
+
+  def handle_info(
+    %{
+      topic: @topic,
+      payload: %{
+        collided?: collided?,
+        score: score
+      }
+    },
+    socket
+  ) do
+
+    if collided? do
+      IO.puts("\nFinal score: #{score}")
+    end
+
+    {:noreply, socket}
   end
 
   defp cell_content(x, y, snake_positions, apple_position) do

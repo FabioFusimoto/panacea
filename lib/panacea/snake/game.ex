@@ -137,6 +137,19 @@ defmodule Panacea.Snake.Game do
         Task.start(
           fn -> GenServer.cast(__MODULE__, {:game_over}) end
         )
+
+        PubSub.broadcast(
+          Panacea.PubSub,
+          @topic,
+          %{
+            topic: @topic,
+            payload: %{
+              collided?: true,
+              score: score
+            }
+          }
+        )
+
         {:noreply, %{state | over?: true}}
       else
         new_positions = if ate_apple_on_last_move? do

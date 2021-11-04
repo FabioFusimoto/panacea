@@ -18,7 +18,7 @@ defmodule PanaceaWeb.Components.Hero do
   def render(assigns) do
     ~F"""
     <section class={"phx-hero", "alert-#{@color}": @color}>
-      <h1>{gettext "Hi, %{name}!", name: @name}</h1>
+      <h1>{gettext "Welcome to %{name}!", name: @name}</h1>
       <p>{@subtitle}</p>
     </section>
     """

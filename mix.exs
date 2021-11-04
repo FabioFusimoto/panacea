@@ -49,7 +49,8 @@ defmodule Panacea.MixProject do
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       {:surface, "~> 0.6.0"},
-      {:surface_formatter, "~> 0.6.0"}
+      {:surface_formatter, "~> 0.6.0"},
+      {:desktop, github: "elixir-desktop/desktop", tag: "v1.3.1"}
     ]
   end
 
@@ -62,7 +63,7 @@ defmodule Panacea.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "cmd npm install --prefix assets"],
-      "assets.deploy": ["esbuild default --minify", "phx.digest"]
+      "assets.deploy": ["phx.digest.clean --all", "esbuild default --minify", "phx.digest"]
     ]
   end
 end

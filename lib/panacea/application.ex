@@ -4,6 +4,7 @@ defmodule Panacea.Application do
   @moduledoc false
 
   use Application
+  alias Panacea.DesktopConfig
 
   def start(_type, _args) do
     children = [
@@ -26,7 +27,11 @@ defmodule Panacea.Application do
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Panacea.Supervisor]
-    Supervisor.start_link(children, opts)
+    {:ok, sup} = Supervisor.start_link(children, opts)
+
+    # For Desktop app
+    Desktop.identify_default_locale(PanaceaWeb.Gettext)
+    {:ok, _} = Supervisor.start_child(sup, DesktopConfig.options())
   end
 
   # Tell Phoenix to update the endpoint configuration

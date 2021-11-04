@@ -17,7 +17,7 @@ defmodule PanaceaWeb.Router do
   scope "/", PanaceaWeb do
     pipe_through :browser
 
-    live "/", PageLive, :index
+    live "/", WelcomeLive, :index
 
     live "/arduino", ArduinoLive, :index
 

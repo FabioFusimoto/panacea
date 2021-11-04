@@ -1,5 +1,5 @@
 defmodule PanaceaWeb.Endpoint do
-  use Phoenix.Endpoint, otp_app: :panacea
+  use Desktop.Endpoint, otp_app: :panacea
 
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
@@ -16,10 +16,6 @@ defmodule PanaceaWeb.Endpoint do
 
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
-  # Serve at "/" the static files from "priv/static" directory.
-  #
-  # You should set gzip to true if you are running phx.digest
-  # when deploying your static files in production.
   plug Plug.Static,
     at: "/",
     from: :panacea,
@@ -49,5 +45,8 @@ defmodule PanaceaWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
+
+  plug Desktop.Auth
+
   plug PanaceaWeb.Router
 end

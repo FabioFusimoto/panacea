@@ -4,14 +4,15 @@ defmodule Panacea.Serial do
 
   @baud_rate 115_200
 
+  #############
+  # Interface #
+  #############
   def start_link(_) do
     GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
-  def port_to_use() do
-    Serial.enumerate()
-    |> Enum.find(fn {_, device} -> device[:product_id] && device[:vendor_id] end)
-    |> elem(0)
+  def retrieve_connection() do
+    GenServer.call(__MODULE__, :retrieve_connection)
   end
 
   def init(_) do
@@ -20,11 +21,19 @@ defmodule Panacea.Serial do
     {:ok, %{connection: connection}}
   end
 
-  def retrieve_connection() do
-    GenServer.call(__MODULE__, :retrieve_connection)
-  end
-
+  ############
+  # Handlers #
+  ############
   def handle_call(:retrieve_connection, _, %{connection: connection}) do
     {:reply, connection, %{connection: connection}}
+  end
+
+  ###########
+  # Helpers #
+  ###########
+  defp port_to_use() do
+    Serial.enumerate()
+    |> Enum.find(fn {_, device} -> device[:product_id] && device[:vendor_id] end)
+    |> elem(0)
   end
 end

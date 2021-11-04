@@ -1,0 +1,5 @@
+<menubar>
+    <menu label="<%= gettext "File" %>">
+        <item onclick="quit"><%= gettext "Quit" %></item>
+    </menu>
+</menubar>

@@ -1,19 +1,13 @@
-# This file is responsible for configuring your application
-# and its dependencies with the aid of the Mix.Config module.
-#
-# This configuration file is loaded before any dependency and
-# is restricted to this project.
-
-# General application configuration
-use Mix.Config
+import Config
 
 # Configures the endpoint
 config :panacea, PanaceaWeb.Endpoint,
-  url: [host: "localhost"],
+  http: [ip: {127, 0, 0, 1}, port: 0],
   secret_key_base: "tcJeZ9fH1+a6BBPmuXef5ZAJaPHL7jBvBwSXZC1Cc97doKD8NKgGrUybArfF9IUo",
   render_errors: [view: PanaceaWeb.ErrorView, accepts: ~w(html json), layout: false],
   pubsub_server: Panacea.PubSub,
-  live_view: [signing_salt: "GwRRp0Jp"]
+  live_view: [signing_salt: "GwRRp0Jp"],
+  server: true
 
 # Configures Elixir's Logger
 config :logger, :console,

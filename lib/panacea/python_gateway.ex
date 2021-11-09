@@ -3,17 +3,11 @@ defmodule Panacea.PythonGateway do
   require Logger
 
   @module_alias :python_gateway
-  @timeout 5000
+  @timeout 15000
 
-  def poolboy_config() do
-    [
-      name: {:local, @module_alias},
-      worker_module: Panacea.PythonGateway,
-      size: 2,
-      max_overflow: 0
-    ]
-  end
-
+  ##################
+  # Initialization #
+  ##################
   def start_link(_) do
     GenServer.start_link(__MODULE__, nil)
   end
@@ -26,7 +20,46 @@ defmodule Panacea.PythonGateway do
     end
   end
 
-  def call_python(file, function, args) do
+  #############
+  # Interface #
+  #############
+  def list_devices(type) do
+    devices = call_python(:audio, :devices, [])
+    filter_fn = fn device ->
+      if type == :input do
+        device['maxInputChannels'] > 0
+      else
+        device['maxOutputChannels'] > 0
+      end
+    end
+    Enum.filter(devices, filter_fn)
+  end
+
+  def record(device_index, duration) do
+    call_python(:audio, :record, [device_index, duration])
+  end
+
+  ############
+  # Handlers #
+  ############
+  def handle_call({:call_python, file, function, args}, _, %{instance: instance}) do
+    result = :python.call(instance, file, function, args)
+    {:reply, result, %{instance: instance}}
+  end
+
+  ###########
+  # Helpers #
+  ###########
+  def poolboy_config() do
+    [
+      name: {:local, @module_alias},
+      worker_module: Panacea.PythonGateway,
+      size: 2,
+      max_overflow: 0
+    ]
+  end
+
+  defp call_python(file, function, args) do
     Task.async(
       fn ->
         :poolboy.transaction(
@@ -44,8 +77,4 @@ defmodule Panacea.PythonGateway do
     |> Task.await(@timeout)
   end
 
-  def handle_call({:call_python, file, function, args}, _, %{instance: instance}) do
-    result = :python.call(instance, file, function, args)
-    {:reply, result, %{instance: instance}}
-  end
 end

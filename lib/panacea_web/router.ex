@@ -24,6 +24,9 @@ defmodule PanaceaWeb.Router do
     live "/png", PngLive, :index
 
     live "/snake", SnakeLive, :index
+
+    live "/soundwave", SoundwaveLive, :index
+
     live "/demo", Demo
   end
 

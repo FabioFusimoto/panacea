@@ -50,7 +50,8 @@ defmodule Panacea.MixProject do
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       {:surface, "~> 0.6.0"},
       {:surface_formatter, "~> 0.6.0"},
-      {:desktop, github: "elixir-desktop/desktop", tag: "v1.3.3"}
+      {:desktop, github: "elixir-desktop/desktop", tag: "v1.3.3"},
+      {:erlport, "~> 0.10.1"}
     ]
   end
 

@@ -21,7 +21,10 @@ defmodule Panacea.Application do
       Panacea.Serial,
 
       # Start the command handler ("background" worker)
-      Panacea.Worker
+      Panacea.Worker,
+
+      # Python gateway handler
+      Panacea.PythonGateway
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

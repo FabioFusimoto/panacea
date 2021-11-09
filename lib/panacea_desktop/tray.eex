@@ -1,3 +1,4 @@
 <menu>
+    <item onclick="toggle"><%= gettext "Open" %></item>
     <item onclick="quit"><%= gettext "Quit" %></item>
 </menu>

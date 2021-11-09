@@ -6,7 +6,6 @@ defmodule PanaceaDesktop.Tray do
   use Desktop.Menu
 
   def mount(menu) do
-    IO.puts("\n\n----------------------\nMounting Tray\n----------------------\n\n")
     {:ok, menu}
   end
 
@@ -15,8 +14,12 @@ defmodule PanaceaDesktop.Tray do
     {:noreply, menu}
   end
 
+  def handle_event("toggle", menu) do
+    Desktop.Window.show(PanaceaDesktop)
+    {:noreply, menu}
+  end
+
   def handle_info(:changed, menu) do
-    IO.puts("Tray - :changed")
     {:noreplay, menu}
   end
 end

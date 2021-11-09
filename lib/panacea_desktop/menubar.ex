@@ -7,7 +7,6 @@ defmodule PanaceaDesktop.Menubar do
   use Desktop.Menu
 
   def mount(menu) do
-    IO.puts("\n\n----------------------\nMounting Menubar\n----------------------\n\n")
     {:ok, menu}
   end
 
@@ -17,7 +16,6 @@ defmodule PanaceaDesktop.Menubar do
   end
 
   def handle_info(:changed, menu) do
-    IO.puts("Menubar - :changed")
     {:noreplay, menu}
   end
 end

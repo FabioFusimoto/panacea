@@ -24,7 +24,7 @@ defmodule Panacea.Application do
       Panacea.Worker,
 
       # Python gateway handler
-      Panacea.PythonGateway
+      :poolboy.child_spec(:worker, Panacea.PythonGateway.poolboy_config())
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

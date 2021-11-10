@@ -126,3 +126,18 @@ header nav a {
 .apple-cell {
   background: red;
 }
+
+.spectrum-table {
+  border: 1px solid #dddddd;
+  table-layout: fixed;
+  width: 210px;
+  height: 378px;
+}
+
+.spectrum-td-empty {
+  background: white;
+}
+
+.spectrum-td-filled {
+  background: green;
+}

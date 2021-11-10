@@ -31,10 +31,7 @@ defmodule Panacea.Snake.Game do
   end
 
   def start(timeout) do
-    if ongoing_game() do
-      GenServer.stop(__MODULE__)
-    end
-
+    stop()
     Worker.reset_if_running()
     GenServer.start(__MODULE__, timeout, name: __MODULE__)
   end

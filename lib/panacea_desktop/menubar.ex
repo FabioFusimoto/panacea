@@ -16,6 +16,6 @@ defmodule PanaceaDesktop.Menubar do
   end
 
   def handle_info(:changed, menu) do
-    {:noreplay, menu}
+    {:noreply, menu}
   end
 end

@@ -18,16 +18,19 @@ defmodule Panacea.Commands do
     connection = Panacea.Serial.retrieve_connection()
     command_string = build_command_string(command, args)
     Serial.write(connection, command_string)
-    {:ok, response} = Serial.read(connection, @timeout)
-    response
+    wait_for_acknowledges(connection, 1, "", 0)
   end
 
   defp wait_for_acknowledges(connection, command_count, acc, attempts) do
-    if String.length(acc) < command_count && attempts != @ack_retry_count do
-      {:ok, serial_buffer} = Serial.read(connection, @timeout)
-      wait_for_acknowledges(connection, command_count, acc <> serial_buffer, attempts + 1)
-    else
-      {acc, attempts}
+    cond do
+      attempts >= @ack_retry_count ->
+        IO.puts("Acknowledge timeout achieved!")
+      String.length(acc) >= command_count ->
+        IO.puts("All acknowledges received!")
+      true ->
+        {:ok, serial_buffer} = Serial.read(connection, @timeout)
+        new_acc = acc <> serial_buffer
+        wait_for_acknowledges(connection, command_count, new_acc, attempts + 1)
     end
   end
 

@@ -17,8 +17,8 @@ defmodule Panacea.Application do
       # Start the Endpoint (http/https)
       PanaceaWeb.Endpoint,
 
-      # Open the serial connection
-      Panacea.Serial,
+      # Open the WebSocket
+      Panacea.WebSocket,
 
       # Start the command handler ("background" worker)
       Panacea.Worker,

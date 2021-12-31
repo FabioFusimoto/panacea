@@ -52,7 +52,8 @@ defmodule Panacea.MixProject do
       {:surface_formatter, "~> 0.6.0"},
       {:desktop, github: "elixir-desktop/desktop", tag: "v1.3.3"},
       {:erlport, "~> 0.10.1"},
-      {:poolboy, "~> 1.5"}
+      {:poolboy, "~> 1.5"},
+      {:websockex, "~> 0.4.3"}
     ]
   end
 

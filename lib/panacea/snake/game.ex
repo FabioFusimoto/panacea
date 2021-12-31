@@ -1,8 +1,10 @@
 defmodule Panacea.Snake.Game do
   use GenServer
 
-  alias Panacea.Leds, as: Leds
-  alias Panacea.Worker, as: Worker
+  alias Panacea.Leds
+  alias Panacea.Commands
+  alias Panacea.Worker
+
   alias Phoenix.PubSub
 
   ###########################
@@ -66,10 +68,31 @@ defmodule Panacea.Snake.Game do
 
     Worker.execute(
       fn ->
-        Leds.light_all(@background_color)
-        Enum.each(initial_state.positions, fn {x, y} -> Leds.light_single(@snake_color, x, y)  end)
-        Leds.light_single(@apple_color, elem(initial_state.apple, 0), elem(initial_state.apple, 1))
-        Leds.show_leds()
+        set_background_commands = ["ALL"]
+        set_background_args = [@background_color]
+
+        light_snake_positions_commands = Enum.map(initial_state.positions, fn _ -> "ONE" end)
+        light_snake_positions_args = Enum.map(
+          initial_state.positions,
+          fn {x, y} ->
+            @snake_color |> List.insert_at(0, y) |> List.insert_at(0, x)
+          end
+        )
+
+        light_apple_position_commands = ["ONE"]
+        light_apple_position_args = [
+          @apple_color
+          |> List.insert_at(0, elem(initial_state.apple, 1))
+          |> List.insert_at(0, elem(initial_state.apple, 0))
+        ]
+
+        show_leds_commands = ["SHO"]
+        show_leds_args = [[]]
+
+        command_list = set_background_commands ++ light_snake_positions_commands ++ light_apple_position_commands ++ show_leds_commands
+        arg_list = set_background_args ++ light_snake_positions_args ++ light_apple_position_args ++ show_leds_args
+
+        Commands.write_multiple!(command_list, arg_list)
       end
     )
 
@@ -126,8 +149,8 @@ defmodule Panacea.Snake.Game do
       new_positions = compute_new_positions(positions, next_direction)
 
       collided? = check_for_collision(
-          Enum.at(new_positions, 0),
-          List.delete_at(new_positions, 0)
+        Enum.at(new_positions, 0),
+         List.delete_at(new_positions, 0)
       )
 
       if collided? do
@@ -167,14 +190,40 @@ defmodule Panacea.Snake.Game do
 
         Worker.execute(
           fn ->
-            if ate_apple_on_this_move? do
-              Leds.light_single(@apple_color, elem(new_apple, 0), elem(new_apple, 1))
+            ate_apple_commands = ["ONE"]
+            ate_apple_args = [
+              @apple_color
+              |> List.insert_at(0, elem(new_apple, 1))
+              |> List.insert_at(0, elem(new_apple, 0))
+            ]
+
+            did_not_eat_apple_commands = ["ONE"]
+            did_not_eat_apple_args = [
+              @background_color
+              |> List.insert_at(0, previous_tail_y)
+              |> List.insert_at(0, previous_tail_x)
+            ]
+
+            {apple_related_commands, apple_related_args} = if ate_apple_on_last_move? do
+              {ate_apple_commands, ate_apple_args}
+            else
+              {did_not_eat_apple_commands, did_not_eat_apple_args}
             end
-            if !ate_apple_on_last_move? do
-              Leds.light_single(@background_color, previous_tail_x, previous_tail_y)
-            end
-            Leds.light_single(@snake_color, new_head_x, new_head_y)
-            Leds.show_leds()
+
+            light_snake_head_commands = ["ONE"]
+            light_snake_head_args = [
+              @snake_color
+              |> List.insert_at(0, new_head_y)
+              |> List.insert_at(0, new_head_x)
+            ]
+
+            show_leds_commands = ["SHO"]
+            show_leds_args = [[]]
+
+            command_list = apple_related_commands ++ light_snake_head_commands ++ show_leds_commands
+            arg_list = apple_related_args ++ light_snake_head_args ++ show_leds_args
+
+            Commands.write_multiple!(command_list, arg_list)
           end
         )
 

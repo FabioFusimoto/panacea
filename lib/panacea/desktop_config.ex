@@ -15,7 +15,7 @@ defmodule Panacea.DesktopConfig do
         app: @app,
         id: PanaceaDesktop,
         title: "Panacea",
-        size: {1024, 800},
+        size: {1200, 900},
         icon: "icon.ico",
         menubar: PanaceaDesktop.Menubar,
         icon_menu: PanaceaDesktop.Tray,

@@ -56,7 +56,7 @@ defmodule Panacea.WebSocket do
     receive do
       {:ack, ^message} -> :ok
     after
-      @acknowledgement_timeout -> IO.puts("Acknowledge timenout for message: #{message}")
+      @acknowledgement_timeout -> IO.puts("Acknowledge timeout for message: #{message}")
     end
   end
 end

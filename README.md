@@ -1,2 +1,2 @@
 # panacea
-Arduino control via serial interface using PhoenixFramework (Elixir)
+Arduino control using PhoenixFramework (Elixir)

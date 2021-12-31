@@ -9,7 +9,7 @@ defmodule PanaceaWeb.SoundwaveLive do
   alias Surface.Components.Form.Submit
 
   alias Panacea.PythonGateway
-  alias Panacea.Spectrum
+  alias Panacea.Spectrum.Analyzer
 
   @topic "live_spectrum"
 
@@ -68,11 +68,6 @@ defmodule PanaceaWeb.SoundwaveLive do
     output_devices = :output
     |> PythonGateway.list_devices()
     |> Enum.map(&device_option/1)
-    |> Enum.filter(
-      fn [_, {:value, index}] ->
-        index == "7" or index == "8"
-      end
-    )
 
     update_rates = [5, 10, 20, 30, 60]
 
@@ -94,21 +89,21 @@ defmodule PanaceaWeb.SoundwaveLive do
   ############
   # Handlers #
   ############
-
   def handle_event(
     "toggle_live_spectrum",
-    %{"output_device" => device_index, "update_rate" => update_rate},
+    params,
     socket
   ) do
     start? = !socket.assigns.live_update?
 
     if start? do
-      Spectrum.start(
+      %{"output_device" => device_index, "update_rate" => update_rate} = params
+      Analyzer.start(
         String.to_integer(device_index),
         String.to_integer(update_rate)
       )
     else
-      Spectrum.stop()
+      Analyzer.stop()
     end
 
     {:noreply, assign(socket, live_update?: start?)}

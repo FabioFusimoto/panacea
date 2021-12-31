@@ -3,7 +3,7 @@ defmodule Panacea.PythonGateway do
   require Logger
 
   @module_alias :python_gateway
-  @timeout :infinity
+  @timeout 250
 
   ##################
   # Initialization #
@@ -35,11 +35,11 @@ defmodule Panacea.PythonGateway do
     Enum.filter(devices, filter_fn)
   end
 
-  def spectrum(device_index, duration, threshold_frequencies, normalization_constant) do
+  def spectrum(device_index, duration, threshold_frequencies) do
     call_python(
       :audio,
       :spectrum,
-      [device_index, duration, threshold_frequencies, normalization_constant],
+      [device_index, duration, threshold_frequencies],
       Enum.map(
         threshold_frequencies,
         fn f -> [f, 0] end
@@ -73,23 +73,22 @@ defmodule Panacea.PythonGateway do
         :poolboy.transaction(
           @module_alias,
           fn pid ->
-            GenServer.call(
-              pid,
-              {:call_python, file, function, args},
-              @timeout
-            )
+            try do
+              GenServer.call(
+                pid,
+                {:call_python, file, function, args},
+                @timeout
+              )
+            catch
+              :exit, _ ->
+                fallback
+            end
           end,
           @timeout
         )
       end
     )
 
-    try do
-      Task.await(python_call, @timeout)
-    catch
-      :exit, _ ->
-        IO.puts("Python call timed out!")
-        fallback
-    end
+    Task.await(python_call, 2 * @timeout)
   end
 end

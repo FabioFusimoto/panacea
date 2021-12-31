@@ -11,7 +11,7 @@ def devices():
 
     return devices
 
-def spectrum(device_index, record_time, threshold_frequencies, normalization_constant = 15000):
+def record_audio_frames(device_index, record_time):
     p = pyaudio.PyAudio()
     default_frames = 512
     record_time_in_seconds = record_time / 1000
@@ -38,24 +38,31 @@ def spectrum(device_index, record_time, threshold_frequencies, normalization_con
     stream.close()
     p.terminate()
 
-    fft = np.fft.fft(recorded_frames)
-    middle = int(fft.size / 2)
-    positive_fft = fft[:middle]
-    positive_fft = np.abs(positive_fft)/len(positive_fft)
+    return recorded_frames, sample_rate
 
-    freqs = np.fft.fftfreq(len(fft)) * 2 * sample_rate
-    positive_freqs = freqs[:middle]
+def spectrum(device_index, record_time, threshold_frequencies):
+    try:
+        recorded_frames, sample_rate = record_audio_frames(device_index, record_time)
+        fft = np.fft.fft(recorded_frames)
+        middle = int(fft.size / 2)
+        positive_fft = fft[:middle]
+        positive_fft = np.abs(positive_fft)/len(positive_fft)
 
-    power_spectrum = []
-    for i, f in enumerate(threshold_frequencies):
-        if i == 0:
-            upper_limit = np.searchsorted(positive_freqs, f)
-            fft_slice = positive_fft[:upper_limit]
-            power_spectrum.append([f, float(np.sum(fft_slice))])
-        else:
-            lower_limit = np.searchsorted(positive_freqs, threshold_frequencies[i - 1])
-            upper_limit = np.searchsorted(positive_freqs, f)
-            fft_slice = positive_fft[lower_limit:upper_limit]
-            power_spectrum.append([f, float(np.sum(fft_slice))])
+        freqs = np.fft.fftfreq(len(fft)) * 2 * sample_rate
+        positive_freqs = freqs[:middle]
 
-    return power_spectrum
+        power_spectrum = []
+        for i, f in enumerate(threshold_frequencies):
+            if i == 0:
+                upper_limit = np.searchsorted(positive_freqs, f)
+                fft_slice = positive_fft[:upper_limit]
+                power_spectrum.append([f, float(np.sum(fft_slice))])
+            else:
+                lower_limit = np.searchsorted(positive_freqs, threshold_frequencies[i - 1])
+                upper_limit = np.searchsorted(positive_freqs, f)
+                fft_slice = positive_fft[lower_limit:upper_limit]
+                power_spectrum.append([f, float(np.sum(fft_slice))])
+
+        return power_spectrum
+    except:
+        return([[f, 0] for f in threshold_frequencies])

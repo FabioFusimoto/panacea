@@ -1,11 +1,13 @@
-defmodule Panacea.Spectrum do
+defmodule Panacea.Spectrum.Analyzer do
   use GenServer
   alias Phoenix.PubSub
 
   alias Panacea.PythonGateway
+  alias Panacea.Spectrum.Commons
+  alias Panacea.Spectrum.Displayer
 
   @topic "live_spectrum"
-  @threshold_frequencies [31, 63, 125, 250, 500, 1000, 2000, 4000, 8000, 16000]
+  @iterations_before_normalization_constant_update 100
 
   #############
   # Interface #
@@ -25,6 +27,7 @@ defmodule Panacea.Spectrum do
       },
       name: __MODULE__
     )
+    Displayer.start()
   end
 
   def stop() do
@@ -57,8 +60,7 @@ defmodule Panacea.Spectrum do
     spectrum = PythonGateway.spectrum(
       device_index,
       update_interval,
-      @threshold_frequencies,
-      constant
+      Commons.frequencies()
     )
 
     max_spectrum_power = max_spectrum_power(spectrum)
@@ -105,13 +107,17 @@ defmodule Panacea.Spectrum do
 
   defp normalize(normalization_constant, spectrum) do
     for [f, p] <- spectrum do
-      try do
-        [f, Enum.min([18, round(p * 18 / normalization_constant)])]
-      catch
-        _ -> [f, 0]
+      normalized_p = if normalization_constant == 0 do
+        0
+      else
+        Enum.min([18, round(p * 18 / normalization_constant)])
       end
+
+      [f, normalized_p]
     end
   end
 
-  defp update_normalization_constant?(new, old, iterations), do: new > old or iterations > 50
+  defp update_normalization_constant?(new, old, iterations) do
+    (new > 1.5 * old) or iterations > @iterations_before_normalization_constant_update
+  end
 end

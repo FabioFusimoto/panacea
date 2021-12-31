@@ -7,7 +7,26 @@ defmodule Panacea.Spectrum.Displayer do
   alias Panacea.Leds
 
   @topic       "live_spectrum"
-  @lit_color   [255, 0, 0]
+  @lit_colors  [
+    [  0, 255, 0],
+    [  0, 255, 0],
+    [ 36, 255, 0],
+    [ 72, 255, 0],
+    [109, 255, 0],
+    [145, 255, 0],
+    [182, 255, 0],
+    [218, 255, 0],
+    [255, 255, 0],
+    [255, 255, 0],
+    [255, 218, 0],
+    [255, 182, 0],
+    [255, 145, 0],
+    [255, 109, 0],
+    [255,  72, 0],
+    [255,  36, 0],
+    [255,   0, 0],
+    [255,   0, 0]
+  ]
   @unlit_color [0, 0, 0]
   @max_power   18
   @x_offset    4
@@ -65,7 +84,7 @@ defmodule Panacea.Spectrum.Displayer do
 
           if new_power > old_power do
             for y <- old_power..(new_power - 1) do
-              [index + @x_offset, @max_power - 1 - y] ++ @lit_color
+              [index + @x_offset, @max_power - 1 - y] ++ Enum.at(@lit_colors, y)
             end
           else
             for y <- new_power..(old_power - 1) do

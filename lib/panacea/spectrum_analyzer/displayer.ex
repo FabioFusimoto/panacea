@@ -105,4 +105,8 @@ defmodule Panacea.Spectrum.Displayer do
 
     {:noreply, Map.put(state, :spectrum, new_spectrum)}
   end
+
+  def handle_info(_message, state) do
+    {:noreply, state}
+  end
 end

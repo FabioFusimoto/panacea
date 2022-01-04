@@ -3,7 +3,7 @@ defmodule Panacea.PythonGateway do
   require Logger
 
   @module_alias :python_gateway
-  @timeout 250
+  @timeout 150
 
   ##################
   # Initialization #

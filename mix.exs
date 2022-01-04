@@ -44,7 +44,7 @@ defmodule Panacea.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:circuits_uart, "~> 1.3"},
+      {:circuits_uart, "~> 1.4.3"},
       {:imagineer, "~> 0.3.3"},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},

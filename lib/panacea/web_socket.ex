@@ -3,7 +3,7 @@ defmodule Panacea.WebSocket do
   require Logger
 
   @ip_address "192.168.0.9"
-  @acknowledgement_timeout 800
+  @acknowledgement_timeout 400
 
   #############
   # Interface #
@@ -56,7 +56,7 @@ defmodule Panacea.WebSocket do
     receive do
       {:ack, ^message} -> :ok
     after
-      @acknowledgement_timeout -> IO.puts("Acknowledge timeout for message: #{message}")
+      @acknowledgement_timeout -> IO.puts("Ack not received for message - #{message}")
     end
   end
 end

@@ -40,11 +40,10 @@ defmodule Panacea.Serial do
   # Helpers #
   ###########
   def port_to_use() do
-    "COM9"
-    # Serial.enumerate()
-    # |> Enum.find(fn {_, device} -> device[:product_id] && device[:vendor_id] end)
-    # |> IO.inspect()
-    # |> elem(0)
-    # |> IO.inspect()
+    Serial.enumerate()
+    |> IO.inspect()
+    |> Enum.find(fn {_, device} -> device[:product_id] && device[:vendor_id] end)
+    |> elem(0)
+    |> IO.inspect()
   end
 end

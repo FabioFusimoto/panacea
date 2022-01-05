@@ -80,8 +80,7 @@ defmodule Panacea.PythonGateway do
                 @timeout
               )
             catch
-              :exit, _ ->
-                fallback
+              :exit, _ -> fallback
             end
           end,
           @timeout

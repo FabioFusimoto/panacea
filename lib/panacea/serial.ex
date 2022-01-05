@@ -3,6 +3,8 @@ defmodule Panacea.Serial do
   alias Circuits.UART, as: Serial
 
   @baud_rate 921_600
+  @acknowledge "*"
+  @response_timeout 500
 
   #############
   # Interface #
@@ -11,22 +13,22 @@ defmodule Panacea.Serial do
     GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
-  def retrieve_connection() do
-    GenServer.call(__MODULE__, :retrieve_connection)
-  end
-
   def init(_) do
     {:ok, connection} = Serial.start_link()
     Serial.open(connection, port_to_use(), speed: @baud_rate, active: false)
+
+    # Exaust all characters currently on the serial buffer before starting
+    {:ok, _} = read(connection)
+
     {:ok, %{connection: connection}}
   end
 
-  def write(connection, message) do
+  def write(message) do
+    connection = retrieve_connection()
     Serial.write(connection, message)
-  end
 
-  def read(connection) do
-    Serial.read(connection, 1000)
+    # Waiting for an acknowledge signal
+    {:ok, @acknowledge} = read(connection)
   end
 
   ############
@@ -45,5 +47,13 @@ defmodule Panacea.Serial do
     |> Enum.find(fn {_, device} -> device[:product_id] && device[:vendor_id] end)
     |> elem(0)
     |> IO.inspect()
+  end
+
+  def retrieve_connection() do
+    GenServer.call(__MODULE__, :retrieve_connection)
+  end
+
+  def read(connection) do
+    Serial.read(connection, @response_timeout)
   end
 end

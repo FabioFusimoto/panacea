@@ -1,9 +1,10 @@
 defmodule Panacea.Commands do
-  alias Panacea.WebSocket
+  alias Panacea.Serial
 
   @commands_separator " "
   @arguments_separator ";"
-  @commands_per_chunk 15
+  @commands_end "\n"
+  @commands_per_chunk 10
 
   defp build_command_string(command, args) do
     args
@@ -13,11 +14,10 @@ defmodule Panacea.Commands do
   end
 
   def write!(command, args \\ []) do
-    command_string = build_command_string(command, args)
-    WebSocket.send(command_string)
+    command_string = build_command_string(command, args) <> @commands_end
+    Serial.write(command_string)
   end
 
-  @spec write_multiple!(any, any) :: :ok
   def write_multiple!(command_list, args_list) do
     command_strings = Enum.map(
       Enum.zip(command_list, args_list),
@@ -31,7 +31,12 @@ defmodule Panacea.Commands do
 
     Enum.each(
       command_chunks,
-      fn chunk -> chunk |> Enum.join() |> WebSocket.send() end
+      fn chunk ->
+        chunk
+        |> Enum.join()
+        |> Kernel.<>(@commands_end)
+        |> Serial.write()
+      end
     )
   end
 

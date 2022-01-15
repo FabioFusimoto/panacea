@@ -1,5 +1,6 @@
 defmodule Panacea.Commands do
   alias Panacea.Serial
+  alias Panacea.WebSocket
 
   @commands_separator " "
   @arguments_separator ";"
@@ -13,9 +14,19 @@ defmodule Panacea.Commands do
     |> Kernel.<>(@commands_separator)
   end
 
+  defp dispatch_command(command) do
+    {os_type, _} = :os.type()
+
+    if (os_type == :win32) do
+      WebSocket.send(command)
+    else
+      Serial.write(command)
+    end
+  end
+
   def write!(command, args \\ []) do
     command_string = build_command_string(command, args) <> @commands_end
-    Serial.write(command_string)
+    dispatch_command(command_string)
   end
 
   def write_multiple!(command_list, args_list) do
@@ -35,7 +46,7 @@ defmodule Panacea.Commands do
         chunk
         |> Enum.join()
         |> Kernel.<>(@commands_end)
-        |> Serial.write()
+        |> dispatch_command()
       end
     )
   end

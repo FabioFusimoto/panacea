@@ -105,7 +105,12 @@ defmodule PanaceaWeb.PngLive do
     socket
   ) do
     offset = {String.to_integer(x_offset), String.to_integer(y_offset)}
-    Worker.execute(fn -> Panacea.Leds.display_png(path, offset) end)
+    Worker.execute(
+      fn ->
+        Panacea.Leds.display_png(path, offset)
+        Process.sleep(10000) # Refreshes every 10 seconds
+      end
+    )
     {:noreply, put_flash(socket, :info, "Image #{path} in being displayed")}
    end
 

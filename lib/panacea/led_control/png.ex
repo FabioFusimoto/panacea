@@ -33,9 +33,7 @@ defmodule Panacea.Png do
   def read_gif(directory) do
     files = Path.wildcard(directory <> "*.png")
 
-    frames = files
-    |> Enum.map(fn image -> Task.async(fn -> read_image(image) end) end)
-    |> Enum.map(fn task -> Task.await(task) end)
+    frames = Enum.map(files, fn image -> read_image(image) end)
 
     frame_count = length(frames)
 

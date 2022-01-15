@@ -13,6 +13,7 @@ defmodule Panacea.Serial do
     GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
+  @spec init(any) :: {:ok, %{connection: pid}}
   def init(_) do
     {:ok, connection} = Serial.start_link()
     Serial.open(connection, port_to_use(), speed: @baud_rate, active: false)
@@ -43,10 +44,8 @@ defmodule Panacea.Serial do
   ###########
   def port_to_use() do
     Serial.enumerate()
-    |> IO.inspect()
     |> Enum.find(fn {_, device} -> device[:product_id] && device[:vendor_id] end)
     |> elem(0)
-    |> IO.inspect()
   end
 
   def retrieve_connection() do

@@ -12,12 +12,17 @@ defmodule PanaceaWeb.SnakeLive do
   alias Panacea.Snake.Controls
   alias Panacea.Snake.Autopilot
 
+  alias PanaceaWeb.Monitor
+
   alias Phoenix.PubSub
 
   @height 18
   @width 18
   @topic "snake"
 
+  ################################
+  # Initialization / Termination #
+  ################################
   def render(assigns) do
     ~F"""
     <section class="container">
@@ -105,6 +110,14 @@ defmodule PanaceaWeb.SnakeLive do
         key: 5,
         value: 50
       ],
+      [
+        key: 6,
+        value: 35
+      ],
+      [
+        key: 7,
+        value: 25
+      ]
     ]
 
     {
@@ -120,7 +133,18 @@ defmodule PanaceaWeb.SnakeLive do
     }
   end
 
+  def unmount() do
+    Game.stop()
+    Autopilot.stop()
+    :ok
+  end
+
+  ############
+  # Handlers #
+  ############
   def handle_event("start_game", %{"speed" => speed, "autopilot" => autopilot, "loop" => loop}, socket) do
+    Monitor.monitor(self(), __MODULE__)
+
     autopilot? = autopilot == "true"
     loop? = loop == "true"
 
@@ -205,6 +229,9 @@ defmodule PanaceaWeb.SnakeLive do
     {:noreply, socket}
   end
 
+  ###########
+  # Helpers #
+  ###########
   defp cell_content(x, y, snake_positions, apple_position) do
     cond do
       Enum.member?(snake_positions, {x, y}) ->

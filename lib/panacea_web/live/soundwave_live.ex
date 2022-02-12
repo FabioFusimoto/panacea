@@ -11,11 +11,13 @@ defmodule PanaceaWeb.SoundwaveLive do
   alias Panacea.PythonGateway
   alias Panacea.Spectrum.Analyzer
 
+  alias PanaceaWeb.Monitor
+
   @topic "live_spectrum"
 
-  ##################
-  # Initialization #
-  ##################
+  ################################
+  # Initialization / Termination #
+  ################################
   def render(assigns) do
     ~F"""
     <section class="container">
@@ -92,6 +94,11 @@ defmodule PanaceaWeb.SoundwaveLive do
     }
   end
 
+  def unmount() do
+    Analyzer.stop()
+    :ok
+  end
+
   ############
   # Handlers #
   ############
@@ -103,6 +110,8 @@ defmodule PanaceaWeb.SoundwaveLive do
     start? = !socket.assigns.live_update?
 
     if start? do
+      Monitor.monitor(self(), __MODULE__)
+
       %{"output_device" => selected_device_index, "update_rate" => selected_update_rate} = params
       Analyzer.start(
         String.to_integer(selected_device_index),

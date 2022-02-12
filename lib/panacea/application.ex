@@ -19,6 +19,9 @@ defmodule Panacea.Application do
       # Start the Endpoint (http/https)
       PanaceaWeb.Endpoint,
 
+      # For the `unmount` hooks
+      PanaceaWeb.Monitor,
+
       # Start the command handler ("background" worker)
       Panacea.Worker,
 

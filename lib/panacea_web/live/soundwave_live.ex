@@ -26,14 +26,14 @@ defmodule PanaceaWeb.SoundwaveLive do
           <div class="inline-element">
             <Field name="output_device">
               <Label>Device</Label>
-              <Select name="output_device" options={@output_devices} />
+              <Select name="output_device" options={@output_devices} selected={@selected_device_index} />
             </Field>
           </div>
 
           <div class="inline-element">
             <Field name="update_rate">
               <Label>Update Rate (Hz)</Label>
-              <Select name="update_rate" options={@update_rates} />
+              <Select name="update_rate" options={@update_rates} selected={@selected_update_rate} />
             </Field>
           </div>
           <Submit>Live Spectrum</Submit>
@@ -43,6 +43,9 @@ defmodule PanaceaWeb.SoundwaveLive do
       </Form>
 
       {#if @live_update?}
+        <div>
+          <p>{@selected_device_description}</p>
+        </div>
         <table id="spectrum-table" class="spectrum-table">
           <tr class="spectrum-tr"/>
           {#for row <- @table}
@@ -78,8 +81,11 @@ defmodule PanaceaWeb.SoundwaveLive do
       assign(
         socket,
         output_devices: output_devices,
+        selected_device_index: 0,
+        selected_device_description: nil,
         durations: 1..10,
         update_rates: update_rates,
+        selected_update_rate: Enum.at(update_rates, 0),
         live_update?: false,
         table: []
       )
@@ -97,16 +103,31 @@ defmodule PanaceaWeb.SoundwaveLive do
     start? = !socket.assigns.live_update?
 
     if start? do
-      %{"output_device" => device_index, "update_rate" => update_rate} = params
+      %{"output_device" => selected_device_index, "update_rate" => selected_update_rate} = params
       Analyzer.start(
-        String.to_integer(device_index),
-        String.to_integer(update_rate)
+        String.to_integer(selected_device_index),
+        String.to_integer(selected_update_rate)
       )
+
+      selected_device_description = socket.assigns.output_devices
+      |> Enum.find(fn [_, value: index] -> index == selected_device_index end)
+      |> Enum.at(0)
+      |> elem(1)
+
+      {
+        :noreply,
+        assign(
+          socket,
+          live_update?: true,
+          selected_update_rate: selected_update_rate,
+          selected_device_index: selected_device_index,
+          selected_device_description: selected_device_description
+        )
+      }
     else
       Analyzer.stop()
+      {:noreply, assign(socket, live_update?: false)}
     end
-
-    {:noreply, assign(socket, live_update?: start?)}
   end
 
   def handle_info(

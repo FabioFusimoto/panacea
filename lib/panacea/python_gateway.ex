@@ -3,7 +3,7 @@ defmodule Panacea.PythonGateway do
   require Logger
 
   @module_alias :python_gateway
-  @timeout 150
+  @timeout 250
 
   ##################
   # Initialization #
@@ -24,27 +24,39 @@ defmodule Panacea.PythonGateway do
   # Interface #
   #############
   def list_devices(type) do
-    devices = call_python(:audio, :devices, [], [])
-    filter_fn = fn device ->
-      if type == :input do
-        device['maxInputChannels'] > 0
-      else
-        device['maxOutputChannels'] > 0
-      end
+    call_result = call_python(:audio, :devices, [])
+
+    case call_result do
+      {:ok, device_descriptions} ->
+        filter_fn = fn device ->
+          if type == :input do
+            device['maxInputChannels'] > 0
+          else
+            device['maxOutputChannels'] > 0
+          end
+        end
+        Enum.filter(device_descriptions, filter_fn)
+      :failed ->
+        []
     end
-    Enum.filter(devices, filter_fn)
   end
 
   def spectrum(device_index, duration, threshold_frequencies) do
-    call_python(
+    call_result = call_python(
       :audio,
       :spectrum,
-      [device_index, duration, threshold_frequencies],
-      Enum.map(
-        threshold_frequencies,
-        fn f -> [f, 0] end
-      )
+      [device_index, duration, threshold_frequencies]
     )
+
+    fallback = Enum.map(
+      threshold_frequencies,
+      fn f -> [f, 0] end
+    )
+
+    case call_result do
+      {:ok, spectrum_analyzed} -> spectrum_analyzed
+      :failed -> fallback
+    end
   end
 
   ############
@@ -55,6 +67,10 @@ defmodule Panacea.PythonGateway do
     {:reply, result, %{instance: instance}}
   end
 
+  def handle_info(:timeout, state) do
+    {:noreply, state}
+  end
+
   ###########
   # Helpers #
   ###########
@@ -62,13 +78,13 @@ defmodule Panacea.PythonGateway do
     [
       name: {:local, @module_alias},
       worker_module: Panacea.PythonGateway,
-      size: 2,
+      size: 100,
       max_overflow: 0
     ]
   end
 
-  defp call_python(file, function, args, fallback) do
-    python_call = Task.async(
+  defp call_python(file, function, args) do
+    python_call_task = Task.async(
       fn ->
         :poolboy.transaction(
           @module_alias,
@@ -76,11 +92,10 @@ defmodule Panacea.PythonGateway do
             try do
               GenServer.call(
                 pid,
-                {:call_python, file, function, args},
-                @timeout
+                {:call_python, file, function, args}
               )
             catch
-              :exit, _ -> fallback
+              :exit, _ -> :failed
             end
           end,
           @timeout
@@ -88,6 +103,13 @@ defmodule Panacea.PythonGateway do
       end
     )
 
-    Task.await(python_call, 2 * @timeout)
+    task_result = Task.yield(python_call_task, @timeout)
+
+    case task_result do
+      {:ok, result} ->
+        {:ok, result}
+      _ ->
+        :failed
+    end
   end
 end

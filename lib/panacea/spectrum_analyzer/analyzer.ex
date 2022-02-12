@@ -57,10 +57,11 @@ defmodule Panacea.Spectrum.Analyzer do
       }
     } = state
 
+    threshold_frequencies = Commons.frequencies()
     spectrum = PythonGateway.spectrum(
       device_index,
       update_interval,
-      Commons.frequencies()
+      threshold_frequencies
     )
 
     max_spectrum_power = max_spectrum_power(spectrum)
@@ -94,6 +95,10 @@ defmodule Panacea.Spectrum.Analyzer do
         }
       }
     }
+  end
+
+  def handle_info(_whatever, state) do
+    {:noreply, state}
   end
 
   ###########

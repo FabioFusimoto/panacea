@@ -34,19 +34,19 @@ defmodule PanaceaWeb.SnakeLive do
                 <div class="inline-element">
                     <Field name="speed">
                         <Label>Speed</Label>
-                        <Select name="speed" options={@speeds}/>
+                        <Select name="speed" options={@speeds} selected={@selected_speed} />
                     </Field>
                 </div>
                 <div class="inline-element">
                     <Field name="autopilot">
                         <Label>Autopilot?</Label>
-                        <Checkbox name="autopilot"/>
+                        <Checkbox name="autopilot" value={@autopilot?} />
                     </Field>
                 </div>
                 <div class="inline-element">
                     <Field name="loop">
                         <Label>Loop?</Label>
-                        <Checkbox name="loop"/>
+                        <Checkbox name="loop" value={@loop?} />
                     </Field>
                 </div>
                 <Submit>Start!</Submit>
@@ -126,6 +126,9 @@ defmodule PanaceaWeb.SnakeLive do
         socket,
         started: false,
         speeds: speeds,
+        selected_speed: speeds |> Enum.at(3) |> Enum.at(1) |> elem(1),
+        autopilot?: false,
+        loop?: false,
         cells_content: initial_cells_content,
         width: @width,
         height: @height
@@ -149,13 +152,26 @@ defmodule PanaceaWeb.SnakeLive do
     loop? = loop == "true"
 
     speed_as_int = String.to_integer(speed)
+    selected_speed = socket.assigns.speeds
+    |> Enum.find(fn [_, value: value] -> value == speed_as_int end)
+    |> Enum.at(1)
+    |> elem(1)
 
     if autopilot? do
       Autopilot.start(%{loop?: loop?, speed: speed_as_int})
     end
 
     Game.start(String.to_integer(speed))
-    {:noreply, assign(socket, started: true, autopilot?: autopilot?)}
+    {
+      :noreply,
+      assign(
+        socket,
+        started: true,
+        selected_speed: selected_speed,
+        autopilot?: autopilot?,
+        loop?: loop?
+      )
+    }
   end
 
   def handle_event("stop_game", _value, socket) do

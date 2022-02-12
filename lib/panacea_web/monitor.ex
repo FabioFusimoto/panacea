@@ -5,7 +5,6 @@ defmodule PanaceaWeb.Monitor do
   # Interface #
   #############
   def monitor(pid, view_module) do
-    IO.puts("Called PanaceaWeb.Monitor.monitor")
     GenServer.call(
       __MODULE__,
       {:monitor, pid, view_module}

@@ -1,5 +1,4 @@
 defmodule Panacea.Commands do
-  alias Panacea.Serial
   alias Panacea.WebSocket
 
   @commands_separator " "
@@ -15,13 +14,7 @@ defmodule Panacea.Commands do
   end
 
   defp dispatch_command(command) do
-    {os_type, _} = :os.type()
-
-    if (os_type == :win32) do
-      WebSocket.send(command)
-    else
-      Serial.write(command)
-    end
+    WebSocket.send(command)
   end
 
   def write!(command, args \\ []) do

@@ -7,8 +7,6 @@ defmodule Panacea.Application do
   alias Panacea.DesktopConfig
 
   def start(_type, _args) do
-    {os_type, _} = :os.type()
-
     children = [
       # Start the Telemetry supervisor
       PanaceaWeb.Telemetry,
@@ -26,19 +24,16 @@ defmodule Panacea.Application do
       Panacea.Worker,
 
       # Python gateway handler
-      :poolboy.child_spec(:worker, Panacea.PythonGateway.poolboy_config())
-    ]
+      :poolboy.child_spec(:worker, Panacea.PythonGateway.poolboy_config()),
 
-    children_plus_command_dispatcher = if os_type == :win32 do
-      [Panacea.WebSocket | children]
-    else
-      [Panacea.Serial | children]
-    end
+      # ESP32 communication - commands dispatcher
+      Panacea.WebSocket
+    ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Panacea.Supervisor]
-    {:ok, sup} = Supervisor.start_link(children_plus_command_dispatcher, opts)
+    {:ok, sup} = Supervisor.start_link(children, opts)
 
     # For Desktop app
     Desktop.identify_default_locale(PanaceaWeb.Gettext)

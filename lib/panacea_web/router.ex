@@ -27,6 +27,8 @@ defmodule PanaceaWeb.Router do
 
     live "/soundwave", SoundwaveLive, :index
 
+    live "/backlighting", BacklightingLive, :index
+
     live "/demo", Demo
   end
 

@@ -27,7 +27,7 @@ defmodule Panacea.Application do
       :poolboy.child_spec(:worker, Panacea.PythonGateway.poolboy_config()),
 
       # ESP32 communication - commands dispatcher
-      Panacea.WebSocket
+      Panacea.Serial
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

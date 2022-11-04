@@ -2,8 +2,6 @@ defmodule Panacea.Leds do
   alias Panacea.Commands, as: Commands
   alias Panacea.Png, as: Png
 
-  @dialyzer {:nowarn_function, display_png: 1, display_png: 2}
-
   def show_leds() do
     Commands.write!("SHO")
   end
@@ -22,6 +20,7 @@ defmodule Panacea.Leds do
       color = Png.color_for(frame, x, y)
       light_single(color, x + x_offset, y + y_offset)
     end
+
     show_leds()
   end
 
@@ -39,19 +38,25 @@ defmodule Panacea.Leds do
   def display_gif(directory, target_fps, repetitions) do
     {shifted_frames, pixel_diff} = Png.read_gif(directory)
     light_matrix(List.last(shifted_frames))
-    target_frametime = round(1_000 / target_fps) # in miliseconds
+    # in miliseconds
+    target_frametime = round(1_000 / target_fps)
+
     for _ <- 1..repetitions do
       Enum.each(
         Enum.zip(shifted_frames, pixel_diff),
         fn {frame, diff} ->
           started_at = System.system_time(:millisecond)
 
-          commands = for _ <- 1..length(diff) do "ONE" end
-          |> List.insert_at(length(diff), "SHO")
+          commands =
+            for _ <- 1..length(diff) do
+              "ONE"
+            end
+            |> List.insert_at(length(diff), "SHO")
 
-          arg_list = diff
-          |> Enum.map(fn {x, y} -> [x, y] ++ Png.color_for(frame, x, y) end)
-          |> List.insert_at(length(diff), [])
+          arg_list =
+            diff
+            |> Enum.map(fn {x, y} -> [x, y] ++ Png.color_for(frame, x, y) end)
+            |> List.insert_at(length(diff), [])
 
           Commands.write_multiple!(commands, arg_list)
 

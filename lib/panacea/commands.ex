@@ -1,5 +1,5 @@
 defmodule Panacea.Commands do
-  alias Panacea.WebSocket
+  alias Panacea.Serial
 
   @commands_separator " "
   @arguments_separator ";"
@@ -14,7 +14,7 @@ defmodule Panacea.Commands do
   end
 
   defp dispatch_command(command) do
-    WebSocket.send(command)
+    Serial.write(command)
   end
 
   def write!(command, args \\ []) do
@@ -23,15 +23,17 @@ defmodule Panacea.Commands do
   end
 
   def write_multiple!(command_list, args_list) do
-    command_strings = Enum.map(
-      Enum.zip(command_list, args_list),
-      fn {command, args} -> build_command_string(command, args) end
-    )
+    command_strings =
+      Enum.map(
+        Enum.zip(command_list, args_list),
+        fn {command, args} -> build_command_string(command, args) end
+      )
 
-    command_chunks = Enum.chunk_every(
-      command_strings,
-      @commands_per_chunk
-    )
+    command_chunks =
+      Enum.chunk_every(
+        command_strings,
+        @commands_per_chunk
+      )
 
     Enum.each(
       command_chunks,
@@ -50,6 +52,8 @@ defmodule Panacea.Commands do
       "ONE" => ["X", "Y", "R", "G", "B"],
       "ALL" => ["R", "G", "B"],
       "BRI" => ["Brightness"],
+      "ONB" => ["Index", "R", "G", "B"],
+      "ALB" => ["R", "G", "B"]
     }
   end
 end

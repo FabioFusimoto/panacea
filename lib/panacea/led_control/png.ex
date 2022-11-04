@@ -3,7 +3,6 @@ defmodule Panacea.Png do
 
   @height 18
   @width 18
-  @dialyzer {:nowarn_function, rgba_to_rgb: 1, read_image: 1}
 
   defp rgba_to_rgb({r, g, b, _}) do
     Tuple.to_list({r, g, b})
@@ -37,13 +36,15 @@ defmodule Panacea.Png do
 
     frame_count = length(frames)
 
-    shifted_frames = frames
-    |> List.insert_at(frame_count, Enum.at(frames, 0))
-    |> List.delete_at(0)
+    shifted_frames =
+      frames
+      |> List.insert_at(frame_count, Enum.at(frames, 0))
+      |> List.delete_at(0)
 
-    pixel_diff = frames
-    |> Enum.zip(shifted_frames)
-    |> Enum.map(&frame_diff/1)
+    pixel_diff =
+      frames
+      |> Enum.zip(shifted_frames)
+      |> Enum.map(&frame_diff/1)
 
     {shifted_frames, pixel_diff}
   end

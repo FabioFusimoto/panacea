@@ -7,7 +7,7 @@ defmodule Panacea.MixProject do
       version: "0.1.0",
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers() ++ [:surface],
+      compilers: [:phoenix] ++ Mix.compilers() ++ [:surface],
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps()
@@ -33,12 +33,12 @@ defmodule Panacea.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.6.2"},
-      {:phoenix_live_view, "~> 0.16.0"},
+      {:phoenix, "~> 1.6.15"},
+      {:phoenix_live_view, "~> 0.18.3"},
       {:floki, ">= 0.30.0", only: :test},
-      {:phoenix_html, "~> 3.0.0"},
+      {:phoenix_html, "~> 3.2.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_dashboard, "~> 0.5.3"},
+      {:phoenix_live_dashboard, "~> 0.7"},
       {:telemetry_metrics, "~> 0.6.1"},
       {:telemetry_poller, "~> 1.0.0"},
       {:gettext, "~> 0.11"},
@@ -48,8 +48,8 @@ defmodule Panacea.MixProject do
       {:imagineer, "~> 0.3.3"},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
-      {:surface, "~> 0.6.0"},
-      {:surface_formatter, "~> 0.6.0"},
+      {:surface, "~> 0.9.0"},
+      {:surface_formatter, "~> 0.7.5"},
       {:desktop, github: "elixir-desktop/desktop", tag: "v1.3.3"},
       {:erlport, "~> 0.10.1"},
       {:poolboy, "~> 1.5"},

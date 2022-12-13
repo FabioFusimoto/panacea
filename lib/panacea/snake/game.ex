@@ -96,7 +96,7 @@ defmodule Panacea.Snake.Game do
       end
     )
 
-    # Automatically update it's state in a loop
+    # Automatically update its state in a loop
     loop(timeout)
 
     {:ok, initial_state}

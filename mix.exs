@@ -53,7 +53,8 @@ defmodule Panacea.MixProject do
       {:desktop, github: "elixir-desktop/desktop", tag: "v1.3.3"},
       {:erlport, "~> 0.10.1"},
       {:poolboy, "~> 1.5"},
-      {:websockex, "~> 0.4.3"}
+      {:websockex, "~> 0.4.3"},
+      {:color_utils, "0.2.0"}
     ]
   end
 

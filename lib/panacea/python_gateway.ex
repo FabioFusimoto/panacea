@@ -15,7 +15,8 @@ defmodule Panacea.PythonGateway do
   def init(_) do
     path = Path.join([:code.priv_dir(:panacea), "python"])
 
-    with {:ok, instance} <- :python.start([{:python_path, to_charlist(path)}, {:python, 'python'}]) do
+    with {:ok, instance} <-
+           :python.start([{:python_path, to_charlist(path)}, {:python, 'python'}]) do
       {:ok, %{instance: instance}}
     end
   end
@@ -35,27 +36,46 @@ defmodule Panacea.PythonGateway do
             device['maxOutputChannels'] > 0
           end
         end
+
         Enum.filter(device_descriptions, filter_fn)
+
       :failed ->
         []
     end
   end
 
   def spectrum(device_index, duration, threshold_frequencies) do
-    call_result = call_python(
-      :audio,
-      :spectrum,
-      [device_index, duration, threshold_frequencies]
-    )
+    call_result =
+      call_python(
+        :audio,
+        :spectrum,
+        [device_index, duration, threshold_frequencies]
+      )
 
-    fallback = Enum.map(
-      threshold_frequencies,
-      fn f -> [f, 0] end
-    )
+    fallback =
+      Enum.map(
+        threshold_frequencies,
+        fn f -> [f, 0] end
+      )
 
     case call_result do
       {:ok, spectrum_analyzed} -> spectrum_analyzed
       :failed -> fallback
+    end
+  end
+
+  def most_frequent_color() do
+    result =
+      call_python(
+        :screen,
+        :get_most_frequent_color,
+        [],
+        1000
+      )
+
+    case result do
+      {:ok, result} -> {:ok, Kernel.inspect(result)}
+      _ -> :failed
     end
   end
 
@@ -83,9 +103,9 @@ defmodule Panacea.PythonGateway do
     ]
   end
 
-  defp call_python(file, function, args) do
-    python_call_task = Task.async(
-      fn ->
+  defp call_python(file, function, args, timeout \\ @timeout) do
+    python_call_task =
+      Task.async(fn ->
         :poolboy.transaction(
           @module_alias,
           fn pid ->
@@ -98,16 +118,16 @@ defmodule Panacea.PythonGateway do
               :exit, _ -> :failed
             end
           end,
-          @timeout
+          timeout
         )
-      end
-    )
+      end)
 
-    task_result = Task.yield(python_call_task, @timeout)
+    task_result = Task.yield(python_call_task, timeout)
 
     case task_result do
       {:ok, result} ->
         {:ok, result}
+
       _ ->
         :failed
     end

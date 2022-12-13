@@ -1,24 +1,15 @@
 defmodule Panacea.Backlighting do
-  alias Panacea.Commands, as: Commands
+  alias ColorUtils
+
+  alias Panacea.Colors
+  alias Panacea.Commands
+  alias Panacea.PythonGateway
 
   @led_count 62
 
-  @doc "Returns [r,g,b] as integers from a #HHHHHH hex string representation"
-  defp hex_string_to_rgb_array(hex_string) do
-    r_str = String.slice(hex_string, 1..2)
-    g_str = String.slice(hex_string, 3..4)
-    b_str = String.slice(hex_string, 5..6)
-
-    {r, _} = Integer.parse(r_str, 16)
-    {g, _} = Integer.parse(g_str, 16)
-    {b, _} = Integer.parse(b_str, 16)
-
-    [r, g, b]
-  end
-
   def display_gradient(starting_color_hex_string, ending_color_hex_string) do
-    starting_rgb = hex_string_to_rgb_array(starting_color_hex_string)
-    ending_rgb = hex_string_to_rgb_array(ending_color_hex_string)
+    starting_rgb = Colors.hex_string_to_rgb_array(starting_color_hex_string)
+    ending_rgb = Colors.hex_string_to_rgb_array(ending_color_hex_string)
 
     [r_delta, g_delta, b_delta] =
       starting_rgb
@@ -46,5 +37,26 @@ defmodule Panacea.Backlighting do
 
     Commands.write_multiple!(display_one_commands, colors_sequence)
     Commands.write!("SHO")
+  end
+
+  def display_matching_color() do
+    result = PythonGateway.most_frequent_color()
+
+    case result do
+      {:ok, color_hex} ->
+        original_rgb = Colors.hex_string_to_rgb_array(color_hex)
+
+        # IO.puts("\n>>> Original color:")
+        # Enum.map(original_rgb, fn v -> IO.inspect(v) end)
+
+        rgb_with_boosted_saturation = Colors.with_saturation_boost(original_rgb)
+        # IO.puts("\n>>> Color with boosted saturation")
+        # Enum.map(rgb_with_boosted_saturation, fn v -> IO.inspect(v) end)
+
+        Commands.write!("ALB", original_rgb)
+
+      _ ->
+        IO.puts("Couldn't retrieve matching color for screen!")
+    end
   end
 end

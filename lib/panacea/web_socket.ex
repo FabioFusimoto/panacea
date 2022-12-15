@@ -28,7 +28,7 @@ defmodule Panacea.WebSocket do
     {:ok, pid}
   end
 
-  def send(message) do
+  def write(message) do
     WebSockex.send_frame(__MODULE__, {:text, message})
 
     started_at = :os.system_time(:millisecond)

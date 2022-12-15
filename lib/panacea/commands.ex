@@ -1,5 +1,5 @@
 defmodule Panacea.Commands do
-  alias Panacea.Serial
+  alias Panacea.WebSocket
 
   @commands_separator " "
   @arguments_separator ";"
@@ -14,7 +14,7 @@ defmodule Panacea.Commands do
   end
 
   defp dispatch_command(command) do
-    Serial.write(command)
+    WebSocket.write(command)
   end
 
   def write!(command, args \\ []) do

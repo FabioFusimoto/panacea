@@ -2,7 +2,7 @@ defmodule Panacea.Serial do
   use GenServer
   alias Circuits.UART, as: Serial
 
-  @baud_rate 921_600
+  @baud_rate 9600
   @acknowledge "*"
   @response_timeout 500
 
@@ -16,7 +16,13 @@ defmodule Panacea.Serial do
   @spec init(any) :: {:ok, %{connection: pid}}
   def init(_) do
     {:ok, connection} = Serial.start_link()
-    Serial.open(connection, port_to_use(), speed: @baud_rate, active: false)
+
+    Serial.open(
+      connection,
+      port_to_use(),
+      speed: @baud_rate,
+      active: false
+    )
 
     # Exaust all characters currently on the serial buffer before starting
     {:ok, _} = read(connection)

@@ -37,4 +37,3 @@ npm-debug.log
 assets/js/_hooks/
 
 *.pyc
-*.cpython-38.pyc

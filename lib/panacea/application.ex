@@ -28,6 +28,7 @@ defmodule Panacea.Application do
 
       # ESP32 communication - commands dispatcher
       Panacea.WebSocket
+      # Panacea.Serial
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

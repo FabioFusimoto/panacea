@@ -2,7 +2,7 @@ defmodule Panacea.Serial do
   use GenServer
   alias Circuits.UART, as: Serial
 
-  @baud_rate 9600
+  @baud_rate 115200
   @acknowledge "*"
   @response_timeout 500
 

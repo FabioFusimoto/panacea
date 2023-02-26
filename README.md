@@ -1,7 +1,7 @@
 # panacea
 Arduino control using PhoenixFramework (Elixir)
 
-## Making Erlang work with WebView
+## Setup steps (Linux)
 
 - Install the dependencies
 
@@ -30,3 +30,14 @@ KERL_USE_AUTOCONF=0 KERL_CONFIGURE_OPTIONS="--enable-wx --with-wx --enable-webvi
 ``` shell
 asdf install elixir 1.14.3-otp-24
 ```
+
+## Setup steps (Windows)
+
+- Install wxWidgets 3.0.5 (Windows version): https://github.com/wxWidgets/wxWidgets/releases/download/v3.0.5/wxMSW-3.0.5-Setup.exe
+- Install Erlang and Elixir: https://github.com/elixir-lang/elixir-windows-setup/releases/download/v2.4/elixir-websetup.exe
+- Install chocolatey: https://chocolatey.org/install
+- Install mingw through chocolatey (running through an administrator command line):
+``` shell
+choco install mingw 
+```
+- Relogin for the changes on the PATH variable to take an effect

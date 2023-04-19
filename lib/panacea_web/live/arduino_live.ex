@@ -8,7 +8,8 @@ defmodule PanaceaWeb.ArduinoLive do
   alias Surface.Components.Form.Select
   alias Surface.Components.Form.Submit
 
-  alias Panacea.Worker, as: Worker
+  alias Panacea.Leds
+  alias Panacea.Worker
 
   def render(assigns) do
     ~F"""
@@ -74,9 +75,26 @@ defmodule PanaceaWeb.ArduinoLive do
 
     arg_values = Enum.map(arg_labels, &(form[&1]))
 
+    IO.inspect(arg_values)
+
     Worker.execute(
       fn ->
-        Panacea.Commands.write!(selected_command, arg_values)
+        case selected_command do
+          "ALL" ->
+            arg_values
+            |> Enum.map(&(String.to_integer(&1)))
+            |> Leds.light_all()
+
+          "ONE" ->
+            [x, y | color] = arg_values
+
+            color
+            |> Enum.map(&(String.to_integer(&1)))
+            |> Leds.light_single(x, y)
+
+          _ ->
+            Panacea.Commands.write!(selected_command, arg_values)
+        end
       end
     )
 

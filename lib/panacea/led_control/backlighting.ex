@@ -49,10 +49,6 @@ defmodule Panacea.Backlighting do
         # IO.puts("\n>>> Original color:")
         # Enum.map(original_rgb, fn v -> IO.inspect(v) end)
 
-        rgb_with_boosted_saturation = Colors.with_saturation_boost(original_rgb)
-        # IO.puts("\n>>> Color with boosted saturation")
-        # Enum.map(rgb_with_boosted_saturation, fn v -> IO.inspect(v) end)
-
         Commands.write!("ALB", original_rgb)
 
       _ ->

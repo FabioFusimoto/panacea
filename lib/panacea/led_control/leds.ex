@@ -1,17 +1,20 @@
 defmodule Panacea.Leds do
-  alias Panacea.Commands, as: Commands
-  alias Panacea.Png, as: Png
+  alias Panacea.Colors
+  alias Panacea.Commands
+  alias Panacea.Png
 
   def show_leds() do
     Commands.write!("SHO")
   end
 
   def light_all(color) do
-    Commands.write!("ALL", color)
+    gamma_corrected_color = Colors.color_with_corrected_gamma(color)
+    Commands.write!("ALL", gamma_corrected_color)
   end
 
   def light_single(color, x, y) do
-    Commands.write!("ONE", color |> List.insert_at(0, y) |> List.insert_at(0, x))
+    gamma_corrected_color = Colors.color_with_corrected_gamma(color)
+    Commands.write!("ONE", gamma_corrected_color |> List.insert_at(0, y) |> List.insert_at(0, x))
     :ok
   end
 
@@ -55,7 +58,14 @@ defmodule Panacea.Leds do
 
           arg_list =
             diff
-            |> Enum.map(fn {x, y} -> [x, y] ++ Png.color_for(frame, x, y) end)
+            |> Enum.map(
+              fn {x, y} ->
+                corrected_color = frame
+                |> Png.color_for(x, y)
+                |> Colors.color_with_corrected_gamma()
+
+                [x, y] ++ corrected_color
+              end)
             |> List.insert_at(length(diff), [])
 
           Commands.write_multiple!(commands, arg_list)

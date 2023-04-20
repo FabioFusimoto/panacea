@@ -12,9 +12,20 @@ defmodule Panacea.Leds do
     Commands.write!("ALL", gamma_corrected_color)
   end
 
+  def light_all_back(color) do
+    gamma_corrected_color = Colors.color_with_corrected_gamma(color)
+    Commands.write!("ALB", gamma_corrected_color)
+  end
+
   def light_single(color, x, y) do
     gamma_corrected_color = Colors.color_with_corrected_gamma(color)
     Commands.write!("ONE", gamma_corrected_color |> List.insert_at(0, y) |> List.insert_at(0, x))
+    :ok
+  end
+
+  def light_single_back(color, index) do
+    gamma_corrected_color = Colors.color_with_corrected_gamma(color)
+    Commands.write!("ONB", gamma_corrected_color |> List.insert_at(0, index))
     :ok
   end
 

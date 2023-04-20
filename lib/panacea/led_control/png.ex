@@ -1,6 +1,5 @@
 defmodule Panacea.Png do
   alias Imagineer, as: Png
-  alias Panacea.Colors
 
   @height 18
   @width 18

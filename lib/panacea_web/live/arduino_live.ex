@@ -75,15 +75,25 @@ defmodule PanaceaWeb.ArduinoLive do
 
     arg_values = Enum.map(arg_labels, &(form[&1]))
 
-    IO.inspect(arg_values)
-
     Worker.execute(
       fn ->
         case selected_command do
+          "ALB" ->
+            arg_values
+            |> Enum.map(&(String.to_integer(&1)))
+            |> Leds.light_all_back()
+
           "ALL" ->
             arg_values
             |> Enum.map(&(String.to_integer(&1)))
             |> Leds.light_all()
+
+          "ONB" ->
+            [index | color] = arg_values
+
+            color
+            |> Enum.map(&(String.to_integer(&1)))
+            |> Leds.light_single_back(index)
 
           "ONE" ->
             [x, y | color] = arg_values

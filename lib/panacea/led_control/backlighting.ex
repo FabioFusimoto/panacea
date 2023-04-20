@@ -20,18 +20,19 @@ defmodule Panacea.Backlighting do
 
     [starting_r, starting_g, starting_b] = starting_rgb
 
-    colors_sequence =
-      Enum.map(
-        0..(@led_count - 1),
-        fn index ->
-          [
-            index,
-            round(starting_r + r_delta * index),
-            round(starting_g + g_delta * index),
-            round(starting_b + b_delta * index)
-          ]
-        end
-      )
+    colors_sequence = 0..(@led_count - 1)
+    |> Enum.map(fn index ->
+      [
+        index,
+        round(starting_r + r_delta * index),
+        round(starting_g + g_delta * index),
+        round(starting_b + b_delta * index)
+      ]
+    end)
+    |> Enum.map(fn [index | color] ->
+      gamma_corrected_color = Colors.color_with_corrected_gamma(color)
+      [index | gamma_corrected_color]
+    end)
 
     display_one_commands = for(_ <- 1..@led_count, do: "ONB")
 

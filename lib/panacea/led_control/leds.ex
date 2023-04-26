@@ -30,11 +30,20 @@ defmodule Panacea.Leds do
   end
 
   def light_matrix(frame, {x_offset, y_offset} \\ {0, 0}) do
-    for y <- 0..(length(frame) - 1), x <- 0..(length(Enum.at(frame, y)) - 1) do
-      color = Png.color_for(frame, x, y)
-      light_single(color, x + x_offset, y + y_offset)
+
+    arg_list = for y <- 0..(length(frame) - 1), x <- 0..(length(Enum.at(frame, y)) - 1) do
+      corrected_color = frame
+      |> Png.color_for(x, y)
+      |> Colors.color_with_corrected_gamma()
+
+      [x + x_offset, y + y_offset] ++ corrected_color
     end
 
+    one_commands = for _ <- 1..length(arg_list) do
+      "ONE"
+    end
+
+    Commands.write_multiple!(one_commands, arg_list)
     show_leds()
   end
 

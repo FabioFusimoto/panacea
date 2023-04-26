@@ -4,7 +4,7 @@ defmodule Panacea.Commands do
   @commands_separator " "
   @arguments_separator ";"
   @commands_end "\n"
-  @commands_per_chunk 10
+  @commands_per_chunk 50
 
   defp build_command_string(command, args) do
     args

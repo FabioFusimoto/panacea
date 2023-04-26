@@ -46,11 +46,8 @@ defmodule Panacea.Backlighting do
     case result do
       {:ok, color_hex} ->
         original_rgb = Colors.hex_string_to_rgb_array(color_hex)
-
-        # IO.puts("\n>>> Original color:")
-        # Enum.map(original_rgb, fn v -> IO.inspect(v) end)
-
-        Commands.write!("ALB", original_rgb)
+        gamma_corrected_color = Colors.color_with_corrected_gamma(original_rgb)
+        Commands.write!("ALB", gamma_corrected_color)
 
       _ ->
         IO.puts("Couldn't retrieve matching color for screen!")

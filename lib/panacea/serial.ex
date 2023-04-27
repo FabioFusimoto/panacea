@@ -7,6 +7,11 @@ defmodule Panacea.Serial do
   # Interface #
   #############
   def start_link(_) do
+    Task.start(
+      fn ->
+        System.cmd("python", [".\\priv\\python\\webSocketServerForSerialCommunication.py"])
+      end
+    )
     {:ok, pid} = WebSockex.start_link(
       "ws://" <> @ip_address,
       __MODULE__,

@@ -1,64 +1,22 @@
 defmodule Panacea.Serial do
-  use GenServer
-  alias Circuits.UART, as: Serial
+  use WebSockex
 
-  @baud_rate 115200
-  @acknowledge "*"
-  @response_timeout 500
+  @ip_address "localhost:8001"
 
   #############
   # Interface #
   #############
   def start_link(_) do
-    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
-  end
-
-  @spec init(any) :: {:ok, %{connection: pid}}
-  def init(_) do
-    {:ok, connection} = Serial.start_link()
-
-    Serial.open(
-      connection,
-      port_to_use(),
-      speed: @baud_rate,
-      active: false
+    {:ok, pid} = WebSockex.start_link(
+      "ws://" <> @ip_address,
+      __MODULE__,
+      %{},
+      name: __MODULE__
     )
-
-    # Exaust all characters currently on the serial buffer before starting
-    {:ok, _} = read(connection)
-
-    {:ok, %{connection: connection}}
+    {:ok, pid}
   end
 
   def write(message) do
-    connection = retrieve_connection()
-    Serial.write(connection, message)
-
-    # Waiting for an acknowledge signal
-    {:ok, @acknowledge} = read(connection)
-  end
-
-  ############
-  # Handlers #
-  ############
-  def handle_call(:retrieve_connection, _, %{connection: connection}) do
-    {:reply, connection, %{connection: connection}}
-  end
-
-  ###########
-  # Helpers #
-  ###########
-  def port_to_use() do
-    Serial.enumerate()
-    |> Enum.find(fn {_, device} -> device[:product_id] && device[:vendor_id] end)
-    |> elem(0)
-  end
-
-  def retrieve_connection() do
-    GenServer.call(__MODULE__, :retrieve_connection)
-  end
-
-  def read(connection) do
-    Serial.read(connection, @response_timeout)
+    WebSockex.send_frame(__MODULE__, {:text, message})
   end
 end

@@ -1,10 +1,13 @@
 import asyncio
 import serial
+import serial.tools.list_ports
 import websockets
 
+serialPort = serial.tools.list_ports.comports()[0].device
+print('Starting serial connection to port {}...'.format(serialPort))
+connection = serial.Serial(serialPort, 230400, timeout=1)
+
 async def handler(websocket):
-    print('Starting serial connection...')
-    connection = serial.Serial('COM3', 230400, timeout=1)
     async for message in websocket:
         connection.write(bytes(message, 'ascii'))
         # Wait for ACK

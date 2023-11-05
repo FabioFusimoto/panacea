@@ -6,8 +6,8 @@ defmodule Panacea.Snake.Autopilot do
   alias Panacea.Snake.Game
 
   @topic "snake"
-  @width 18
-  @height 18
+  @width 32
+  @height 32
 
   #############
   # Interface #
@@ -18,6 +18,7 @@ defmodule Panacea.Snake.Autopilot do
 
   def stop() do
     if Process.whereis(__MODULE__) do
+
       GenServer.stop(__MODULE__)
     end
   end

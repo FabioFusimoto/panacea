@@ -16,8 +16,8 @@ defmodule PanaceaWeb.SnakeLive do
 
   alias Phoenix.PubSub
 
-  @height 18
-  @width 18
+  @height 32
+  @width 32
   @topic "snake"
 
   ################################

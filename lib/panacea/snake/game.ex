@@ -13,8 +13,8 @@ defmodule Panacea.Snake.Game do
   @background_color [0, 0, 0]
   @snake_color [0, 255, 0]
   @apple_color [255, 0, 0]
-  @width 18
-  @height 18
+  @width 32
+  @height 32
   @default_game_timeout 125
   @animation_time 600 # in ms
 
